@@ -1,4 +1,7 @@
 //import scala.slick.driver.H2Driver.simple._
+
+import nl.dekkr.hoppr.db.Tables
+
 import scala.slick.driver.PostgresDriver.simple._
 
 // The main application

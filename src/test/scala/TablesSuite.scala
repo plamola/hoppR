@@ -1,3 +1,4 @@
+import nl.dekkr.hoppr.db.{Tables, Schema}
 import org.scalatest._
 import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.jdbc.meta._
@@ -21,7 +22,6 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
 
 
   before {
-    //session = Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver").createSession()
     session = Database.forURL(url = "jdbc:postgresql://localhost/feedrtest",
       user = "feedr", password = "narcoticflowerelecticgrey",
       driver = "org.postgresql.Driver").createSession()
@@ -29,19 +29,14 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
 
   test("Recreating the schema") {
     val existingTables = MTable.getTables.list
-    if (existingTables.exists(_.name.name.equalsIgnoreCase("coffees"))) {
-      Tables.Coffees.ddl.drop
-    }
-    if (existingTables.exists(_.name.name.equalsIgnoreCase("suppliers"))) {
-      Tables.Suppliers.ddl.drop
-    }
+
     if (existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
       Tables.Articles.ddl.drop
     }
     if (existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
       Tables.Feeds.ddl.drop
     }
-    Tables.ddl.create
+    Schema.createOrUpdate(session)
 
     val tables = MTable.getTables.list
     assert(tables.count(_.name.name.equalsIgnoreCase("article")) == 1)
@@ -49,15 +44,22 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
   }
 
 
+  test("Verifying the schema create/update works") {
+    try {
+      Schema.createOrUpdate(session)
+    } catch {
+      case e : Exception =>
+        fail(e.getMessage)
+    }
+  }
+
+
   test("Inserting a feed works") {
-    //createSchema()
     val insertCount = insertFeed()
     assert(insertCount == 1)
   }
 
   test("Query feeds works") {
-    //createSchema()
-    //insertFeed()
     val results = feeds.list
     assert(results.size == 1)
     assert(results.head.feedurl == "url")
@@ -65,14 +67,11 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
   }
 
   test("Inserting a article works") {
-    //createSchema()
     val insertCount = insertArticle()
     assert(insertCount == 1)
   }
 
   test("Query article works") {
-    //createSchema()
-    //insertArticle()
     val results = articles.list
     assert(results.size == 1)
     assert(results.head.id == Option(1))

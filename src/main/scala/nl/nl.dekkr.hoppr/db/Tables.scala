@@ -1,3 +1,4 @@
+package nl.dekkr.hoppr.db
 
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {
@@ -16,48 +17,8 @@ trait Tables {
   import scala.slick.lifted.{ProvenShape, ForeignKeyQuery}
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-  lazy val ddl = Suppliers.ddl ++ Coffees.ddl ++ Articles.ddl ++ Feeds.ddl
-
-
-  // A Suppliers table with 6 columns: id, name, street, city, state, zip
-  class Suppliers(tag: Tag)
-    extends Table[(Int, String, String, String, String, String)](tag, "suppliers") {
-
-    // This is the primary key column:
-    def id: Column[Int] = column[Int]("sup_id", O.PrimaryKey)
-    def name: Column[String] = column[String]("sup_name")
-    def street: Column[String] = column[String]("street")
-    def city: Column[String] = column[String]("city")
-    def state: Column[String] = column[String]("state")
-    def zip: Column[String] = column[String]("zip")
-
-    // Every table needs a * projection with the same type as the table's type parameter
-    def * : ProvenShape[(Int, String, String, String, String, String)] =
-      (id, name, street, city, state, zip)
-  }
-  lazy val Suppliers = new TableQuery(tag => new Suppliers(tag))
-
-
-
-  // A Coffees table with 5 columns: name, supplier id, price, sales, total
-  class Coffees(tag: Tag)
-    extends Table[(String, Int, Double, Int, Int)](tag, "coffees") {
-
-    def name: Column[String] = column[String]("cof_name", O.PrimaryKey)
-    def supID: Column[Int] = column[Int]("sup_id")
-    def price: Column[Double] = column[Double]("price")
-    def sales: Column[Int] = column[Int]("sales")
-    def total: Column[Int] = column[Int]("total")
-
-    def * : ProvenShape[(String, Int, Double, Int, Int)] =
-      (name, supID, price, sales, total)
-
-    // A reified foreign key relation that can be navigated to create a join
-    def supplier: ForeignKeyQuery[Suppliers, (Int, String, String, String, String, String)] =
-      foreignKey("sup_fk", supID, TableQuery[Suppliers])(_.id)
-  }
-  lazy val Coffees = new TableQuery(tag => new Coffees(tag))
-
+  //lazy val ddl = Suppliers.ddl ++ Coffees.ddl ++ Articles.ddl ++ Feeds.ddl
+  lazy val ddl = Articles.ddl ++ Feeds.ddl
 
 
   case class ArticleRow(id: Option[Int] = None, feedid: Option[Int] = None, uri: String, link: Option[String] = None, title: Option[String] = None, content: Option[String] = None, author: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: Option[DateTime] = None, lastsynceddate: Option[DateTime] = None)
@@ -106,5 +67,45 @@ trait Tables {
       (id, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, lastarticlecount, faviconfk) <>(FeedRow.tupled, FeedRow.unapply)
   }
   lazy val Feeds = new TableQuery(tag => new Feeds(tag))
+
+  // A Suppliers table with 6 columns: id, name, street, city, state, zip
+  class Suppliers(tag: Tag)
+    extends Table[(Int, String, String, String, String, String)](tag, "suppliers") {
+
+    // This is the primary key column:
+    def id: Column[Int] = column[Int]("sup_id", O.PrimaryKey)
+    def name: Column[String] = column[String]("sup_name")
+    def street: Column[String] = column[String]("street")
+    def city: Column[String] = column[String]("city")
+    def state: Column[String] = column[String]("state")
+    def zip: Column[String] = column[String]("zip")
+
+    // Every table needs a * projection with the same type as the table's type parameter
+    def * : ProvenShape[(Int, String, String, String, String, String)] =
+      (id, name, street, city, state, zip)
+  }
+  lazy val Suppliers = new TableQuery(tag => new Suppliers(tag))
+
+
+
+  // A Coffees table with 5 columns: name, supplier id, price, sales, total
+  class Coffees(tag: Tag)
+    extends Table[(String, Int, Double, Int, Int)](tag, "coffees") {
+
+    def name: Column[String] = column[String]("cof_name", O.PrimaryKey)
+    def supID: Column[Int] = column[Int]("sup_id")
+    def price: Column[Double] = column[Double]("price")
+    def sales: Column[Int] = column[Int]("sales")
+    def total: Column[Int] = column[Int]("total")
+
+    def * : ProvenShape[(String, Int, Double, Int, Int)] =
+      (name, supID, price, sales, total)
+
+    // A reified foreign key relation that can be navigated to create a join
+    def supplier: ForeignKeyQuery[Suppliers, (Int, String, String, String, String, String)] =
+      foreignKey("sup_fk", supID, TableQuery[Suppliers])(_.id)
+  }
+  lazy val Coffees = new TableQuery(tag => new Coffees(tag))
+
 
 }
