@@ -21,10 +21,10 @@ object HelloHoppr extends App with BootedCore with CoreActors {
 
   // Add some dummy feeds
   if (feeds.list.size < 1)
-    feeds += Tables.FeedRow(id = 1, feedurl = "http://blog.dekkr.nl/rss", link = Option("link"), title = Option("feed title"))
+    feeds += Tables.FeedRow( feedurl = "http://blog.dekkr.nl/rss", link = Option("link"), title = Option("feed title"))
 
   if (feeds.list.size < 2)
-    feeds += Tables.FeedRow(id = 1, feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
+    feeds += Tables.FeedRow( feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
 
   // List all available feeds
   println("id \tupdated \turl")

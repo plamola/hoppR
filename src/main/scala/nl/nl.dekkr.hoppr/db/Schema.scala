@@ -22,6 +22,11 @@ object Schema {
     } else {
       // Update existing table structure
     }
+    if (!existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
+      Tables.FetchLog.ddl.create
+    } else {
+      // Update existing table structure
+    }
   }
 
   def getSession = {
