@@ -27,8 +27,8 @@ object HelloHoppr extends App with BootedCore with CoreActors {
     feeds += Tables.FeedRow( feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
 
   // List all available feeds
-  println("id \tupdated \turl")
-  for {c <- feeds.list} println("" + c.id + " \t" + c.updateddate + " \t" + c.feedurl)
+  println("id \tupdated \t \t \turl")
+  for {c <- feeds.list} println("" + c.id.get + " \t" + c.updateddate + " \t" + c.feedurl)
   println("##### Done")
 
 
@@ -36,7 +36,5 @@ object HelloHoppr extends App with BootedCore with CoreActors {
     Duration.create(0, TimeUnit.MILLISECONDS),
     Duration.create(1, TimeUnit.MINUTES),
     fetchsupervisor, FetchSupervisor.Nudge)
-
-
 
 }

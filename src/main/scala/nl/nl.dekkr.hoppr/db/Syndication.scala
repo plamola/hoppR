@@ -15,7 +15,6 @@ object Syndication {
   implicit val session = Schema.getSession
 
   def getFeedsForUpdate(): List[String] = {
-    implicit val session = Schema.getSession
     val feeds = TableQuery[Tables.Feeds]
     // TODO get only the feeds that need updating
     //for {c <- feeds if c.updateddate.minusMinutes(c.updateInterval) < DateTime.now() } roundRobinRouter ! GetFeed(c.feedurl)
@@ -23,9 +22,9 @@ object Syndication {
   }
 
 
-  def updateFeedLastUpdated(feedUri: String): Unit = {
+  def updateFeedLastUpdated(uri: String): Unit = {
     val feeds = TableQuery[Tables.Feeds]
-    val q = for { c <- feeds if c.feedurl === feedUri } yield c.updateddate
+    val q = for { c <- feeds if c.feedurl === uri } yield c.updateddate
     q.update(DateTime.now())
     val statement = q.updateStatement
     val invoker = q.updateInvoker
