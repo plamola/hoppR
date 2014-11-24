@@ -93,6 +93,17 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
     assert(joinedResults.head._2 == Option("feed title"))
   }
 
+  test("Inserting a fetchlog works") {
+    val insertCount = insertFetchLog()
+    assert(insertCount == 1)
+  }
+
+  test("Query fetchlog works") {
+    val results = fetchlog.list
+    assert(results.size == 1)
+    assert(results.head.uri == "log-uri")
+    assert(results.head.result == Option("result"))
+  }
 
   after {
     session.close()
