@@ -31,7 +31,7 @@ class SyndicationActorSpec extends TestKit(ActorSystem()) with SpecificationLike
     }
 
     "get content from rss feed" in {
-      syndication ! GetFeed("http://blog.dekkr.nl/rss")
+      syndication ! GetFeed("http://dekkr.nl/rss")
       expectMsgPF() {
         case FeedContent(url, content) =>
          content.getTitle equals "Dekkr Projects"
