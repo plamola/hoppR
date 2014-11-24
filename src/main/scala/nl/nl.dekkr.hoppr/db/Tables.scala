@@ -48,6 +48,9 @@ trait Tables {
     val updateddate: Column[Option[DateTime]] = column[Option[DateTime]]("updateddate", O.Default(None))
     val lastsynceddate: Column[Option[DateTime]] = column[Option[DateTime]]("lastsynceddate", O.Default(None))
 
+    /** Uniqueness Index over (feedid, uri)  **/
+    def idx = index("unique_feedid_uri", (feedid, uri), unique = true)
+
     def * : ProvenShape[ArticleRow] =
       (id.?, feedid.?, uri, link, title, content, author, publisheddate, updateddate, lastsynceddate) <>(ArticleRow.tupled, ArticleRow.unapply)
 
