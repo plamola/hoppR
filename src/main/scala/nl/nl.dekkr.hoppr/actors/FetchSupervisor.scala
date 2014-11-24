@@ -1,12 +1,12 @@
 package nl.dekkr.hoppr.actors
 
 import com.sun.syndication.feed.synd.SyndFeed
-import com.sun.xml.internal.bind.v2.TODO
 import nl.dekkr.hoppr.actors.FetchSupervisor.Nudge
 import nl.dekkr.hoppr.actors.SyndicationActor.GetFeed
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import akka.event.Logging
 import akka.routing.FromConfig
+import nl.nl.dekkr.hoppr.db.Syndication
 
 import scala.slick.driver.PostgresDriver.simple._
 
@@ -33,35 +33,36 @@ class FetchSupervisor extends Actor {
 
   def receive = {
     case Nudge =>
-      updateSyndicationFeeds()
-      updateLinkedInSubscriptions()
-      updateTwitterSearches()
+      log.info("##### Find updatable content")
+      for(url <- Syndication.getFeedsForUpdate()) roundRobinRouter ! GetFeed(url)
+      // TODO
+      //updateLinkedInSubscriptions()
+      //updateTwitterSearches()
+
     case SyndicationActor.FeedContent(url, content: SyndFeed) =>
-      println(s"answer from ${sender()}")
-      println(s"Got content for $url - ${content.getEntries.size()} entries")
-      // Todo Store content & write log
+      Syndication.updateFeedLastUpdated(url)
+      // Todo Store content
+      insertFetchLog(url,s"Got ${content.getEntries.size()} entries")
+
     case SyndicationActor.FeedNoContentFound(url) =>
-      println("No content found")
-      // Todo update lastupdated & write log
+      Syndication.updateFeedLastUpdated(url)
+      insertFetchLog(url,"No content")
+
     case SyndicationActor.FeedException(url, error: String) =>
-      println("Feed exception: " + error)
-    // Todo update lastupdated & write log
+      Syndication.updateFeedLastUpdated(url)
+      insertFetchLog(url,s"Feed exception: $error")
+
     case _ =>
-      log.info("received unknown message")
+      log.error("unknown message received")
   }
 
-  def updateSyndicationFeeds(): Unit = {
-    log.info("##### Find updatable feeds")
-    // TODO move this to a separate object
-    val feeds = TableQuery[Tables.Feeds]
-    implicit val session = Schema.getSession
-    for {c <- feeds.list} roundRobinRouter ! GetFeed(c.feedurl)
-    log.info("##### All feeds updates have been requested")
+  def updateLinkedInSubscriptions() = ??? // TODO implement
+  def updateTwitterSearches() = ???       // TODO implement
+
+
+  def insertFetchLog(feedUri: String, fetchResult: String): Int = {
+    log.debug(s"[$feedUri] $fetchResult")
+    TableQuery[Tables.FetchLog] += Tables.FetchLogRow(uri = feedUri, result = Option(fetchResult))
   }
-
-  def updateLinkedInSubscriptions() = ???
-  def updateTwitterSearches() = ???
-
-
 
 }

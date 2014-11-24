@@ -23,6 +23,7 @@ libraryDependencies ++= List(
   "io.spray"                 % "spray-json_2.11"     % "1.2.6",
   "io.spray"                 % "spray-testkit_2.11"  % "1.3.1",
   "joda-time"                % "joda-time"           % "2.4",
+  "org.joda"                 % "joda-convert"        % "1.6",
   "net.databinder.dispatch"  % "dispatch-core_2.11"  % "0.11.1",
   "org.joda"                 % "joda-convert"        % "1.6",
   "org.scalaj"              %% "scalaj-http"         % "0.3.16",

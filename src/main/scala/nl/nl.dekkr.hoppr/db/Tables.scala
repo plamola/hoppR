@@ -20,13 +20,13 @@ trait Tables {
   lazy val ddl = FetchLog.ddl ++ Articles.ddl ++ Feeds.ddl
 
 
-  case class FetchLogRow(id: Option[Int] = None, uri: String, result: Option[String] = None,  logdate: Option[DateTime] = None)
+  case class FetchLogRow(id: Option[Int] = None, uri: String, result: Option[String] = None,  logdate: DateTime = DateTime.now())
 
   class FetchLog(tag: Tag) extends Table[FetchLogRow](tag, "fetchlog") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val uri: Column[String] = column[String]("uri", O.Length(1024, varying = true))
     val result : Column[Option[String]] = column[Option[String]]("result", O.Length(1024, varying = true), O.Default(None))
-    val logdate: Column[Option[DateTime]] = column[Option[DateTime]]("logdate", O.Default(None))
+    val logdate: Column[DateTime] = column[DateTime]("logdate")
 
     def * : ProvenShape[FetchLogRow] =
       (id.?, uri, result, logdate) <>(FetchLogRow.tupled, FetchLogRow.unapply)
@@ -58,9 +58,7 @@ trait Tables {
 
 
 
-
-
-  case class FeedRow(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: Option[DateTime] = None, updateInterval: Int = 60, lastarticlecount: Int = 0, faviconfk: Int = 0)
+  case class FeedRow(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, lastarticlecount: Int = 0, faviconfk: Int = 0)
 
   class Feeds(tag: Tag) extends Table[FeedRow](tag, "feed") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -70,7 +68,7 @@ trait Tables {
     val description: Column[Option[String]] = column[Option[String]]("description", O.Length(1024, varying = true), O.Default(None))
     val image: Column[Option[String]] = column[Option[String]]("image", O.Length(255, varying = true), O.Default(None))
     val publisheddate: Column[Option[DateTime]] = column[Option[DateTime]]("publisheddate", O.Default(None))
-    val updateddate: Column[Option[DateTime]] = column[Option[DateTime]]("updateddate", O.Default(None))
+    val updateddate: Column[DateTime] = column[DateTime]("updateddate", O.Default(DateTime.now()))
     val updateInterval: Column[Int] = column[Int]("update_interval", O.Default(60))
     val lastarticlecount: Column[Int] = column[Int]("lastarticlecount", O.Default(0))
     val faviconfk: Column[Int] = column[Int]("faviconfk", O.Default(0))
@@ -90,44 +88,44 @@ trait Tables {
 
 
 
-//  // A Suppliers table with 6 columns: id, name, street, city, state, zip
-//  class Suppliers(tag: Tag)
-//    extends Table[(Int, String, String, String, String, String)](tag, "suppliers") {
-//
-//    // This is the primary key column:
-//    def id: Column[Int] = column[Int]("sup_id", O.PrimaryKey)
-//    def name: Column[String] = column[String]("sup_name")
-//    def street: Column[String] = column[String]("street")
-//    def city: Column[String] = column[String]("city")
-//    def state: Column[String] = column[String]("state")
-//    def zip: Column[String] = column[String]("zip")
-//
-//    // Every table needs a * projection with the same type as the table's type parameter
-//    def * : ProvenShape[(Int, String, String, String, String, String)] =
-//      (id, name, street, city, state, zip)
-//  }
-//  lazy val Suppliers = new TableQuery(tag => new Suppliers(tag))
-//
-//
-//
-//  // A Coffees table with 5 columns: name, supplier id, price, sales, total
-//  class Coffees(tag: Tag)
-//    extends Table[(String, Int, Double, Int, Int)](tag, "coffees") {
-//
-//    def name: Column[String] = column[String]("cof_name", O.PrimaryKey)
-//    def supID: Column[Int] = column[Int]("sup_id")
-//    def price: Column[Double] = column[Double]("price")
-//    def sales: Column[Int] = column[Int]("sales")
-//    def total: Column[Int] = column[Int]("total")
-//
-//    def * : ProvenShape[(String, Int, Double, Int, Int)] =
-//      (name, supID, price, sales, total)
-//
-//    // A reified foreign key relation that can be navigated to create a join
-//    def supplier: ForeignKeyQuery[Suppliers, (Int, String, String, String, String, String)] =
-//      foreignKey("sup_fk", supID, TableQuery[Suppliers])(_.id)
-//  }
-//  lazy val Coffees = new TableQuery(tag => new Coffees(tag))
+  // A Suppliers table with 6 columns: id, name, street, city, state, zip
+  class Suppliers(tag: Tag)
+    extends Table[(Int, String, String, String, String, String)](tag, "suppliers") {
+
+    // This is the primary key column:
+    def id: Column[Int] = column[Int]("sup_id", O.PrimaryKey)
+    def name: Column[String] = column[String]("sup_name")
+    def street: Column[String] = column[String]("street")
+    def city: Column[String] = column[String]("city")
+    def state: Column[String] = column[String]("state")
+    def zip: Column[String] = column[String]("zip")
+
+    // Every table needs a * projection with the same type as the table's type parameter
+    def * : ProvenShape[(Int, String, String, String, String, String)] =
+      (id, name, street, city, state, zip)
+  }
+  lazy val Suppliers = new TableQuery(tag => new Suppliers(tag))
+
+
+
+  // A Coffees table with 5 columns: name, supplier id, price, sales, total
+  class Coffees(tag: Tag)
+    extends Table[(String, Int, Double, Int, Int)](tag, "coffees") {
+
+    def name: Column[String] = column[String]("cof_name", O.PrimaryKey)
+    def supID: Column[Int] = column[Int]("sup_id")
+    def price: Column[Double] = column[Double]("price")
+    def sales: Column[Int] = column[Int]("sales")
+    def total: Column[Int] = column[Int]("total")
+
+    def * : ProvenShape[(String, Int, Double, Int, Int)] =
+      (name, supID, price, sales, total)
+
+    // A reified foreign key relation that can be navigated to create a join
+    def supplier: ForeignKeyQuery[Suppliers, (Int, String, String, String, String, String)] =
+      foreignKey("sup_fk", supID, TableQuery[Suppliers])(_.id)
+  }
+  lazy val Coffees = new TableQuery(tag => new Coffees(tag))
 
 
 }

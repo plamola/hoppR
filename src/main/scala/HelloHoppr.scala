@@ -38,4 +38,5 @@ object HelloHoppr extends App with BootedCore with CoreActors {
     fetchsupervisor, FetchSupervisor.Nudge)
 
 
+
 }

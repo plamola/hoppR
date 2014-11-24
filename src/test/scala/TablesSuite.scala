@@ -75,11 +75,13 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
   }
 
   test("Query article works") {
-    val results = articles.list
+    val results = articles.filter (_.title === "article title").list
     assert(results.size == 1)
     assert(results.head.id == Option(1))
     assert(results.head.title == Option("article title"))
   }
+
+
   test("Join works"){
     val exisitingFeed = feeds.list.head
     articles += Tables.ArticleRow(feedid = exisitingFeed.id, uri = "uri2", title = Option("article 2"))
