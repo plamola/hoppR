@@ -61,7 +61,7 @@ trait Tables {
 
 
 
-  case class FeedRow(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, lastarticlecount: Int = 0, faviconfk: Int = 0)
+  case class FeedRow(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, nextupdate : Long = DateTime.now().getMillis, lastarticlecount: Int = 0, faviconfk: Int = 0)
 
   class Feeds(tag: Tag) extends Table[FeedRow](tag, "feed") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -73,6 +73,7 @@ trait Tables {
     val publisheddate: Column[Option[DateTime]] = column[Option[DateTime]]("publisheddate", O.Default(None))
     val updateddate: Column[DateTime] = column[DateTime]("updateddate", O.Default(DateTime.now()))
     val updateInterval: Column[Int] = column[Int]("update_interval", O.Default(60))
+    val nextupdate: Column[Long] = column[Long]("nextupdate", O.Default(DateTime.now().getMillis))
     val lastarticlecount: Column[Int] = column[Int]("lastarticlecount", O.Default(0))
     val faviconfk: Column[Int] = column[Int]("faviconfk", O.Default(0))
 
@@ -80,7 +81,7 @@ trait Tables {
     val index1 = index("feed_feedurl_key", feedurl, unique = true)
 
     def * : ProvenShape[FeedRow] =
-      (id.?, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, lastarticlecount, faviconfk) <>(FeedRow.tupled, FeedRow.unapply)
+      (id.?, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, nextupdate, lastarticlecount, faviconfk) <>(FeedRow.tupled, FeedRow.unapply)
   }
   lazy val Feeds = new TableQuery(tag => new Feeds(tag))
 

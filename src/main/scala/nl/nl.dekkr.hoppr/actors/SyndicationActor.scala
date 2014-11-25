@@ -35,7 +35,6 @@ class SyndicationActor extends Actor {
         case Success(content) =>
           content match {
             case Some(feed) =>
-              //println(url+ "\t\r" + feed)
               sender ! FeedContent(url, feed)
             case None =>
               sender ! FeedNoContentFound(url)

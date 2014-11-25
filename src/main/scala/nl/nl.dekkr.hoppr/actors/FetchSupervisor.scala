@@ -6,7 +6,7 @@ import nl.dekkr.hoppr.actors.SyndicationActor.GetFeed
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import akka.event.Logging
 import akka.routing.FromConfig
-import nl.nl.dekkr.hoppr.db.Syndication
+import nl.nl.dekkr.hoppr.model.Syndication
 
 import scala.slick.driver.PostgresDriver.simple._
 
@@ -40,18 +40,16 @@ class FetchSupervisor extends Actor {
       //updateTwitterSearches()
 
     case SyndicationActor.FeedContent(url, content: SyndFeed) =>
-      Syndication.updateFeedLastUpdated(url)
-      // Todo Store content
-      Syndication.storeFeed(url, content)
       insertFetchLog(url,s"Got ${content.getEntries.size()} entries")
+      Syndication.storeFeed(url, content)
 
     case SyndicationActor.FeedNoContentFound(url) =>
-      Syndication.updateFeedLastUpdated(url)
       insertFetchLog(url,"No content")
+      Syndication.setNextUpdate(url)
 
     case SyndicationActor.FeedException(url, error: String) =>
-      Syndication.updateFeedLastUpdated(url)
       insertFetchLog(url,s"Feed exception: $error")
+      Syndication.setNextUpdate(url)
 
     case _ =>
       log.error("unknown message received")
@@ -59,7 +57,6 @@ class FetchSupervisor extends Actor {
 
   def updateLinkedInSubscriptions() = ??? // TODO implement
   def updateTwitterSearches() = ???       // TODO implement
-
 
   def insertFetchLog(feedUri: String, fetchResult: String): Int = {
     log.debug(s"[$feedUri] $fetchResult")

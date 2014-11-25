@@ -1,12 +1,12 @@
-package nl.nl.dekkr.hoppr.db
+package nl.nl.dekkr.hoppr.model
 
 import com.sun.syndication.feed.synd.{SyndContent, SyndEntry, SyndFeed}
 import nl.dekkr.hoppr.db.Tables.{ArticleRow, FeedRow}
 import nl.dekkr.hoppr.db.{Schema, Tables}
 import org.joda.time.DateTime
 
-import scala.slick.lifted.TableQuery
 import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.lifted.TableQuery
 
 
 /**
@@ -18,19 +18,19 @@ object Syndication {
 
   def getFeedsForUpdate : List[String] = {
     val feeds = TableQuery[Tables.Feeds]
-    // TODO get only the feeds that need updating
-    //for {c <- feeds if c.updateddate.minusMinutes(c.updateInterval) < DateTime.now() } roundRobinRouter ! GetFeed(c.feedurl)
-    for {c <- feeds.list } yield c.feedurl
+    for {c <- feeds.list if c.nextupdate < DateTime.now().getMillis } yield c.feedurl
   }
 
 
-  def updateFeedLastUpdated(uri: String): Unit = {
+  def setNextUpdate(uri: String): Unit = {
     val feeds = TableQuery[Tables.Feeds]
-    val q = for { c <- feeds if c.feedurl === uri } yield c.updateddate
-    q.update(DateTime.now())
+    val q = for { c <- feeds if c.feedurl === uri } yield c.nextupdate
+    // TODO use the interval set in the feed, not the hard-coded value of 60
+    q.update(DateTime.now().plusMinutes(60).getMillis)
     val statement = q.updateStatement
     val invoker = q.updateInvoker
   }
+
 
   def storeFeed(uri: String, content: SyndFeed): Unit = {
     val feeds = TableQuery[Tables.Feeds]
@@ -56,7 +56,7 @@ object Syndication {
   }
 
 
-  def makeArticleRow(articleId : Option[Int], feedFk: Option[Int], entry : SyndEntry) : ArticleRow = {
+  private def makeArticleRow(articleId : Option[Int], feedFk: Option[Int], entry : SyndEntry) : ArticleRow = {
     new ArticleRow(
       id = articleId,
       feedid = feedFk,
@@ -72,8 +72,7 @@ object Syndication {
   }
 
 
-
-  def makeFeedRow(uri: String, feedId : Option[Int], faviconfk : Int, interval : Int, content: SyndFeed) : FeedRow = {
+  private def makeFeedRow(uri: String, feedId : Option[Int], faviconfk : Int, interval : Int, content: SyndFeed) : FeedRow = {
     new FeedRow(
     id = feedId,
     faviconfk = faviconfk,
@@ -83,7 +82,8 @@ object Syndication {
     description = Some(content.getDescription),
     publisheddate = toJodaDateTime(content.getPublishedDate),
     updateddate = DateTime.now(),
-    image = {if (content.getImage != null ) Some(content.getImage.getUrl) else None},
+    image = { if (content.getImage != null ) Some(content.getImage.getUrl) else None },
+    nextupdate = DateTime.now().plusMinutes(interval).getMillis,
     updateInterval = interval,
     lastarticlecount = content.getEntries.size()
     )
@@ -91,13 +91,10 @@ object Syndication {
 
 
   // Needed because postgres didn't like the original date types
-  def toJodaDateTime(date : java.util.Date) : Option[DateTime] = {
-    if (date == null) {
-      None
-    } else {
-      Some(new DateTime(date))
-    }
+  private def toJodaDateTime(date : java.util.Date) : Option[DateTime] = {
+    if (date != null) Some(new DateTime(date)) else None
   }
+
 
   private def extractContent(entry: SyndEntry): String = {
     var content: String = ""
@@ -112,7 +109,6 @@ object Syndication {
     }
     content
   }
-
 
 
 }
