@@ -3,7 +3,6 @@ import java.util.concurrent.TimeUnit
 
 import nl.dekkr.actors.{BootedCore, CoreActors}
 import nl.dekkr.hoppr.actors.FetchSupervisor
-import nl.dekkr.hoppr.actors.SyndicationActor.GetFeed
 import nl.dekkr.hoppr.db.{Tables, Schema}
 
 import scala.concurrent.duration.Duration
@@ -25,6 +24,11 @@ object HelloHoppr extends App with BootedCore with CoreActors {
 
   if (feeds.list.size < 2)
     feeds += Tables.FeedRow( feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
+
+  if (feeds.list.size < 3)
+    feeds += Tables.FeedRow( feedurl = "http://www.nu.nl/rss", link = Option("link"), title = Option("NU"))
+
+
 
   // List all available feeds
   println("id \tupdated \t \t \turl")
