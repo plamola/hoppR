@@ -9,10 +9,6 @@ import akka.event.Logging
 import akka.routing.FromConfig
 import nl.nl.dekkr.hoppr.model._
 
-import scala.slick.driver.PostgresDriver.simple._
-
-
-import scala.slick.lifted.TableQuery
 import akka.actor.{Props, Actor}
 
 /**
@@ -34,7 +30,7 @@ class FetchSupervisor extends Actor {
 
   def receive = {
     case Nudge =>
-      log.info("##### Find updatable content")
+      log.info("##### Look for updatable content #####")
       for(url <- Syndication.getFeedsForUpdate) roundRobinRouter ! GetFeed(url)
       // TODO Implement LinkedIn & Twitter
       //updateLinkedInSubscriptions()
@@ -58,9 +54,5 @@ class FetchSupervisor extends Actor {
     case _ =>
       log.error("unknown message received")
   }
-
-
-
-
 
 }
