@@ -4,28 +4,8 @@ package nl.nl.dekkr.hoppr.actors
  * Created by Matthijs Dekker on 25/11/14.
  */
 import akka.actor.Actor
-import nl.dekkr.hoppr.model.FetchLogger
-import nl.dekkr.hoppr.db.Tables.FetchLogRow
-import spray.json._
-import spray.routing._
-import spray.http._
-import MediaTypes._
-import spray.httpx.marshalling._
+import nl.nl.dekkr.hoppr.rest.MyService
 
-object MyJsonProtocol extends DefaultJsonProtocol {
-  implicit object FetchLogRowJsonFormat extends RootJsonFormat[ FetchLogRow ] {
-    def write(c: FetchLogRow) = JsObject(
-      "id"  -> JsNumber(c.id.get),
-      "level" -> JsString(c.level.toString),
-      "uri" -> JsString(c.uri),
-      "result" -> JsString(c.result.get),
-      "date" -> JsString(c.logdate.toString)
-    )
-    def read(value: JsValue) = {
-      throw new DeserializationException("FetchLogRow demarshalling not implemented")
-    }
-  }
-}
 
 
 // we don't implement our route structure directly in the service actor because
@@ -43,22 +23,3 @@ class MyServiceActor extends Actor with MyService {
 }
 
 
-
-
-// this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService {
-  import MyJsonProtocol._
-  import spray.httpx.SprayJsonSupport._
-
-  val myRoute =
-    path("log") {
-      get {
-        respondWithMediaType(`application/json`) { // XML is marshalled to `text/xml` by default, so we simply override here
-          complete {
-            marshal(FetchLogger.getLast100)
-          }
-        }
-      }
-    }
-
-}

@@ -20,7 +20,6 @@ object FetchLogger {
 
   }
 
-
   implicit val session = Schema.getSession
 
   def LogDebug(feedUri: String, fetchResult: String): Unit = writeToFetchLog(feedUri, fetchResult, Debug)
@@ -32,12 +31,6 @@ object FetchLogger {
     TableQuery[Tables.FetchLog] += Tables.FetchLogRow(uri = feedUri, result = Option(fetchResult), level = level)
   }
 
-
-
-
   def getLast100 : List[FetchLogRow] = TableQuery[Tables.FetchLog].take(100).sortBy(_.logdate desc).list
-
-
-
 
 }

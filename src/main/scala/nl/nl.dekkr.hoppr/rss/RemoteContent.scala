@@ -25,6 +25,7 @@ case class RemoteContent() {
         Some(sfi.build(new XmlReader(new java.io.ByteArrayInputStream(responseBody.getBytes("UTF-8")))))
       } catch {
         case e: ParsingFeedException =>
+          // TODO handle Parse exception
           //        Feed.findByFeedUrl(feedurl) match {
           //          case Some(feed) =>
           //            //Logger.error(s"Parsing exception: ${e.getMessage}")
