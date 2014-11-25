@@ -32,7 +32,8 @@ object Syndication {
   }
 
 
-  def storeFeed(uri: String, content: SyndFeed): Unit = {
+  def storeFeed(uri: String, content: SyndFeed): Int = {
+    var newArticleCount : Int = 0
     val feeds = TableQuery[Tables.Feeds]
     // get the feed from the db
     for ( feed <- feeds if feed.feedurl === uri ) {
@@ -50,9 +51,11 @@ object Syndication {
         } else {
           // insert new article
           Tables.Articles += makeArticleRow(None, feed.id, entry)
+          newArticleCount += 1
         }
       }
     }
+    newArticleCount
   }
 
 

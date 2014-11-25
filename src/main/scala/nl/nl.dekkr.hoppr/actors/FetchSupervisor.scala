@@ -6,7 +6,7 @@ import nl.dekkr.hoppr.actors.SyndicationActor.GetFeed
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import akka.event.Logging
 import akka.routing.FromConfig
-import nl.nl.dekkr.hoppr.model.Syndication
+import nl.nl.dekkr.hoppr.model.{Info, Debug, Error, Syndication, LogLevel}
 
 import scala.slick.driver.PostgresDriver.simple._
 
@@ -35,32 +35,37 @@ class FetchSupervisor extends Actor {
     case Nudge =>
       log.info("##### Find updatable content")
       for(url <- Syndication.getFeedsForUpdate) roundRobinRouter ! GetFeed(url)
-      // TODO
+      // TODO Implement LinkedIn & Twitter
       //updateLinkedInSubscriptions()
       //updateTwitterSearches()
 
     case SyndicationActor.FeedContent(url, content: SyndFeed) =>
-      insertFetchLog(url,s"Got ${content.getEntries.size()} entries")
-      Syndication.storeFeed(url, content)
+     Syndication.storeFeed(url, content) match {
+      case 0 =>   LogDebug(url,s"Got ${content.getEntries.size()} existing articles")
+      case count: Int =>  LogInfo(url,s"${count} new articles")
+    }
 
     case SyndicationActor.FeedNoContentFound(url) =>
-      insertFetchLog(url,"No content")
+      LogError(url,"No content")
       Syndication.setNextUpdate(url)
 
     case SyndicationActor.FeedException(url, error: String) =>
-      insertFetchLog(url,s"Feed exception: $error")
+      LogError(url,s"Feed exception: $error")
       Syndication.setNextUpdate(url)
 
     case _ =>
       log.error("unknown message received")
   }
 
-  def updateLinkedInSubscriptions() = ??? // TODO implement
-  def updateTwitterSearches() = ???       // TODO implement
 
-  def insertFetchLog(feedUri: String, fetchResult: String): Int = {
+  private def LogDebug(feedUri: String, fetchResult: String): Unit = writeToFetchLog(feedUri, fetchResult, Debug)
+  private def LogInfo(feedUri: String, fetchResult: String): Int = writeToFetchLog(feedUri, fetchResult, Info)
+  private def LogError(feedUri: String, fetchResult: String): Int = writeToFetchLog(feedUri, fetchResult, Error)
+
+  private def writeToFetchLog(feedUri: String, fetchResult: String, level: LogLevel): Int = {
     log.debug(s"[$feedUri] $fetchResult")
-    TableQuery[Tables.FetchLog] += Tables.FetchLogRow(uri = feedUri, result = Option(fetchResult))
+    TableQuery[Tables.FetchLog] += Tables.FetchLogRow(uri = feedUri, result = Option(fetchResult), level = level)
   }
+
 
 }

@@ -1,9 +1,12 @@
 package nl.dekkr.hoppr.db
 
+import nl.nl.dekkr.hoppr.model.{Info, Error, Warning, Critical, Debug, LogLevel}
+
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {
   val profile = scala.slick.driver.PostgresDriver
 } with Tables
+
 
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
@@ -19,17 +22,37 @@ trait Tables {
   //lazy val ddl = Suppliers.ddl ++ Coffees.ddl ++ Articles.ddl ++ Feeds.ddl
   lazy val ddl = FetchLog.ddl ++ Articles.ddl ++ Feeds.ddl
 
+  implicit val loglevelColumnType = MappedColumnType.base[LogLevel, Int](
+  {  b =>
+    if (b == Critical) 1 else
+    if (b == Error) 2 else
+    if (b == Warning) 3 else
+    if (b == Info) 4 else
+    if (b == Debug) 5 else
+      0
+  }, // Map LogLevel to Int
+  { i =>
+    if (i == 1)  Critical else
+    if (i == 2)  Error else
+    if (i == 3)  Warning else
+    if (i == 4)  Info else
+    Debug
+  } // map Int to LogLevel
+  )
 
-  case class FetchLogRow(id: Option[Int] = None, uri: String, result: Option[String] = None,  logdate: DateTime = DateTime.now())
+
+
+  case class FetchLogRow(id: Option[Int] = None, uri: String, result: Option[String] = None,  logdate: DateTime = DateTime.now(), level : LogLevel = Info)
 
   class FetchLog(tag: Tag) extends Table[FetchLogRow](tag, "fetchlog") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val uri: Column[String] = column[String]("uri", O.Length(1024, varying = true))
     val result : Column[Option[String]] = column[Option[String]]("result", O.Length(1024, varying = true), O.Default(None))
     val logdate: Column[DateTime] = column[DateTime]("logdate")
+    val level : Column[LogLevel] = column[LogLevel]("loglevel")
 
     def * : ProvenShape[FetchLogRow] =
-      (id.?, uri, result, logdate) <>(FetchLogRow.tupled, FetchLogRow.unapply)
+      (id.?, uri, result, logdate, level) <>(FetchLogRow.tupled, FetchLogRow.unapply)
   }
   lazy val FetchLog = new TableQuery(tag => new FetchLog(tag))
 
