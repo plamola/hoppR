@@ -114,4 +114,12 @@ object Syndication {
   }
 
 
+  def addNewFeed(url: String): Int = {
+    val feeds = TableQuery[Tables.Feeds]
+    if (feeds.filter(_.feedurl === url  ).list.size == 0)
+      feeds += Tables.FeedRow( feedurl = url)
+    val feed = feeds.filter(_.feedurl === url  ).first
+    feed.id.getOrElse(0)
+  }
+
 }

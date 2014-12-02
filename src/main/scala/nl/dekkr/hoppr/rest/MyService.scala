@@ -1,6 +1,7 @@
 package nl.nl.dekkr.hoppr.rest
 
 import nl.dekkr.hoppr.model.FetchLogger
+import nl.nl.dekkr.hoppr.model.Syndication
 import spray.http.MediaTypes._
 import spray.httpx.marshalling._
 import spray.routing.HttpService
@@ -42,24 +43,27 @@ trait MyService extends HttpService {
         complete(index)
       }
     } ~
-      pathPrefix("api") {
-        get {
-          path("log") {
-            respondWithMediaType(`application/json`) {
-              complete {
-                marshal(FetchLogger.getLast100)
-              }
-            }
-          }
-        } ~
-        post {
-          path("feed") {
-            respondWithMediaType(`application/json`) {
-              complete("{result: feed}")
+    pathPrefix("api") {
+      get {
+        path("log") {
+          respondWithMediaType(`application/json`) {
+            complete {
+              marshal(FetchLogger.getLast100)
             }
           }
         }
+      } ~
+      post {
+        path("feed") {
+          respondWithMediaType(`application/json`) {
+            Syndication.addNewFeed("test4") match {
+              case i : Int  => complete(s"{feed : $i}")
+              case 0 => complete("{result: failure}")
+              }
+            }
+        }
       }
+    }
   }
 
 
