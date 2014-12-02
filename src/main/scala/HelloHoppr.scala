@@ -1,7 +1,7 @@
 
 import java.util.concurrent.TimeUnit
 
-import nl.dekkr.actors.{BootedCore, CoreActors}
+import nl.dekkr.hoppr.actors.{BootedCore, CoreActors}
 import nl.dekkr.hoppr.actors.FetchSupervisor
 import nl.dekkr.hoppr.db.{Tables, Schema}
 
