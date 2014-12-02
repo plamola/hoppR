@@ -30,9 +30,9 @@ object Schema {
   }
 
   def getSession = {
+    // TODO move hard-coded database credentials to config
     Database.forURL(url = "jdbc:postgresql://localhost/feedrdev", user = "feedr", password = "narcoticflowerelecticgrey",
       driver = "org.postgresql.Driver").createSession()
   }
 
-
-  }
+}
