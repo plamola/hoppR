@@ -10,31 +10,9 @@ import spray.routing.HttpService
  * Created by Matthijs Dekker on 25/11/14.
  */
 // this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService {
+trait RestService extends HttpService {
   import nl.nl.dekkr.hoppr.rest.MyJsonProtocol._
   import spray.httpx.SprayJsonSupport._
-
-  val myRoute_old = {
-    get {
-      pathSingleSlash {
-        complete(index)
-      } ~
-        path("api" / "log") {
-          respondWithMediaType(`application/json`) {
-            complete {
-              marshal(FetchLogger.getLast100)
-            }
-          }
-        }
-    } ~
-    post {
-        path("api" / "feed") {
-          respondWithMediaType(`application/json`) {
-            complete("{result: feed}")
-          }
-        }
-    }
-  }
 
 
   val myRoute = {
@@ -56,6 +34,7 @@ trait MyService extends HttpService {
       post {
         path("feed") {
           respondWithMediaType(`application/json`) {
+            // TODO Use supplied URL instead of current hard-coded value
             Syndication.addNewFeed("test4") match {
               case 0 => complete("{result: failure}")
               case i : Int  => complete(s"{feed : $i}")

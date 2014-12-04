@@ -6,8 +6,8 @@ package nl.dekkr.rss.old
  */
 object MaintainanceJobs {
 
-  // TODO refresh existing favicons older than ?
-  // TODO purge feeds
+  // TODO refresh existing favicons older than ? days
+  // TODO purge feeds (remove content older than ? days
   // TODO increase wait periode until next sync if feed is not parsable??
 
 

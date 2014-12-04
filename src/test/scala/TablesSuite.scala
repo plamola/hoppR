@@ -1,3 +1,4 @@
+import com.typesafe.config.ConfigFactory
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import org.scalatest._
 import scala.slick.driver.PostgresDriver.simple._
@@ -23,9 +24,8 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
 
 
   before {
-    session = Database.forURL(url = "jdbc:postgresql://localhost/feedrtest",
-      user = "feedr", password = "narcoticflowerelecticgrey",
-      driver = "org.postgresql.Driver").createSession()
+    session =
+      Schema.getTestSession
   }
 
   test("Recreating the schema") {

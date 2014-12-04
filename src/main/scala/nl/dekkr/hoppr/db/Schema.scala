@@ -1,6 +1,6 @@
 package nl.dekkr.hoppr.db
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.slick.jdbc.meta.MTable
 import scala.slick.driver.PostgresDriver.simple._
@@ -31,8 +31,11 @@ object Schema {
     }
   }
 
-  def getSession = {
-    var conf = ConfigFactory.load
+  def getSession : Session = getConfiguredSession( ConfigFactory.load )
+  def getTestSession : Session = getConfiguredSession( ConfigFactory.load("application.test.conf") )
+
+
+  private def getConfiguredSession(conf : Config) = {
     Database.forURL(
       url = conf.getString("hoppr.database.url"),
       user = conf.getString("hoppr.database.user"),

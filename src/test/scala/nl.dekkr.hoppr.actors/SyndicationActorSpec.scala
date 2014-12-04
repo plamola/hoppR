@@ -1,4 +1,4 @@
-package nl.dekkr.actors
+package nl.dekkr.hoppr.actors
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
