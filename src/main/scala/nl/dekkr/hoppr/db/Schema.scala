@@ -33,8 +33,11 @@ object Schema {
 
   def getSession = {
     var conf = ConfigFactory.load
-    Database.forURL(url = conf.getString("hoppr.database.url"), user = conf.getString("hoppr.database.user"), password = conf.getString("hoppr.database.password"),
-      driver = "org.postgresql.Driver").createSession()
+    Database.forURL(
+      url = conf.getString("hoppr.database.url"),
+      user = conf.getString("hoppr.database.user"),
+      password = conf.getString("hoppr.database.password"),
+      driver = conf.getString("hoppr.database.driver")).createSession()
   }
 
 }
