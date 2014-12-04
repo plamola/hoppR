@@ -1,5 +1,7 @@
 package nl.dekkr.hoppr.db
 
+import com.typesafe.config.ConfigFactory
+
 import scala.slick.jdbc.meta.MTable
 import scala.slick.driver.PostgresDriver.simple._
 
@@ -30,8 +32,8 @@ object Schema {
   }
 
   def getSession = {
-    // TODO move hard-coded database credentials to config
-    Database.forURL(url = "jdbc:postgresql://localhost/feedrdev", user = "feedr", password = "narcoticflowerelecticgrey",
+    var conf = ConfigFactory.load
+    Database.forURL(url = conf.getString("hoppr.database.url"), user = conf.getString("hoppr.database.user"), password = conf.getString("hoppr.database.password"),
       driver = "org.postgresql.Driver").createSession()
   }
 

@@ -2,6 +2,7 @@ package nl.dekkr.hoppr.actors
 
 import akka.actor.Props
 import akka.io.IO
+import com.typesafe.config.ConfigFactory
 import spray.can.Http
 import akka.pattern.ask
 import akka.util.Timeout
@@ -20,7 +21,6 @@ trait CoreActors {
 
   implicit val timeout = Timeout(5.seconds)
   // start a new HTTP server on port 8080 with our service actor as the handler
-  //TODO move interface & port to config
-  IO(Http) ? Http.Bind(service, interface = "localhost", port = 8080)
-
+  var conf = ConfigFactory.load
+  IO(Http) ? Http.Bind(service, interface = conf.getString("hoppr.api.interface"), port = conf.getInt("hoppr.api.port"))
 }
