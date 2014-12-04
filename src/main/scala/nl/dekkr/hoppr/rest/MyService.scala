@@ -57,8 +57,8 @@ trait MyService extends HttpService {
         path("feed") {
           respondWithMediaType(`application/json`) {
             Syndication.addNewFeed("test4") match {
-              case i : Int  => complete(s"{feed : $i}")
               case 0 => complete("{result: failure}")
+              case i : Int  => complete(s"{feed : $i}")
               }
             }
         }
