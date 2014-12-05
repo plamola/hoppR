@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 trait CoreActors {
   this: Core =>
   val syndication   = system.actorOf(Props[SyndicationActor], "syndication")
-  val fetchsupervisor = system.actorOf(Props[FetchSupervisor],"FetchSupervisor")
+  val fetchsupervisor = system.actorOf(Props[FetchSupervisor],"fetch-supervisor")
 
   val service = system.actorOf(Props[RestServiceActor], "rest-service")
 
