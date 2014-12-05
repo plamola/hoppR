@@ -26,7 +26,6 @@ class TablesSuite extends HopprTestBase {
     session = Schema.getSession
   }
 
-
    "TablesSuite" should {
      "Recreate the schema" in {
        cleanDB()
@@ -35,15 +34,6 @@ class TablesSuite extends HopprTestBase {
        tables.count(_.name.name.equalsIgnoreCase("article")) should be equalTo 1
        tables.count(_.name.name.equalsIgnoreCase("feed")) should be equalTo 1
      }
-
-//       "Verifying the schema create/update works" in {
-//         try {
-//           Schema.createOrUpdate(session)
-//         } catch {
-//           case e : Exception =>
-//             fail(e.getMessage)
-//         }
-//       }
 
      "Insert a feed" in  {
        insertFeed() should be equalTo 1
