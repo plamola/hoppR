@@ -3,8 +3,6 @@
 /target/
 /project/project/
 /project/target/
-/project/activator-*
 /logs/
 /RUNNING_PID
-*.iml
 .DS_Store
