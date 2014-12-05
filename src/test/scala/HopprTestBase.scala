@@ -14,7 +14,7 @@ import scala.slick.jdbc.meta.MTable
  */
 trait HopprTestBase extends Specification
 with Specs2RouteTest with HttpService
-with Configuration { //with BeforeAndAfter {
+with Configuration {
 
   implicit var session: Session = _
 
@@ -24,12 +24,12 @@ with Configuration { //with BeforeAndAfter {
   // connects the DSL to the test ActorSystem
   implicit def actorRefFactory: ActorSystem = system
 
-//  val spec = this
+  val spec = this
 
-//  val customerService = new RestService {
-//    override implicit def actorRefFactory: ActorRefFactory = spec.actorRefFactory
-//  }.rest
-//
+  val restService = new RestService {
+    override implicit def actorRefFactory: ActorRefFactory = spec.actorRefFactory
+  }.myRoute
+
 
 
   def cleanDB(): Unit = {

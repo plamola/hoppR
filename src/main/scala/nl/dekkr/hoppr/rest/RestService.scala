@@ -34,7 +34,8 @@ trait RestService extends HttpService {
         path("feed") {
           respondWithMediaType(`application/json`) {
             // TODO Use supplied URL instead of current hard-coded value
-            Syndication.addNewFeed("test4") match {
+            //Syndication.addNewFeed("test4") match {
+            1 match {
               case 0 => complete("{result: failure}")
               case i : Int  => complete(s"{feed : $i}")
               }
