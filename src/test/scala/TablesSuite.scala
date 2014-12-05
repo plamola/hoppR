@@ -1,114 +1,101 @@
-import com.typesafe.config.ConfigFactory
+
 import nl.dekkr.hoppr.db.{Tables, Schema}
-import org.scalatest._
 import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.jdbc.meta._
 
 
-class TablesSuite extends FunSuite with BeforeAndAfter {
+class TablesSuite extends HopprTestBase {
 
   val feeds = TableQuery[Tables.Feeds]
   val articles = TableQuery[Tables.Articles]
   val fetchlog = TableQuery[Tables.FetchLog]
 
 
-  implicit var session: Session = _
+  val testFeedUrl = "http://url"
 
   def createSchema() = Tables.ddl.create
 
-  def insertFeed(): Int = feeds += Tables.FeedRow( feedurl = "url", link = Option("link"), title = Option("feed title"))
+  def insertFeed(): Int = feeds += Tables.FeedRow( feedurl = testFeedUrl, link = Option("link"), title = Option("feed title"))
 
   def insertArticle(): Int = articles += Tables.ArticleRow(feedid = Option(1), uri = "uri", title = Option("article title"))
 
   def insertFetchLog(): Int = fetchlog += Tables.FetchLogRow(uri = "log-uri", result = Option("result"))
 
 
-  before {
-    session =
-      Schema.getSession
-  }
-
-  test("Recreating the schema") {
-    val existingTables = MTable.getTables.list
-    if (existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
-      Tables.FetchLog.ddl.drop
-    }
-    if (existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
-      Tables.Articles.ddl.drop
-    }
-    if (existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
-      Tables.Feeds.ddl.drop
-    }
-    Schema.createOrUpdate(session)
-
-    val tables = MTable.getTables.list
-    assert(tables.count(_.name.name.equalsIgnoreCase("fetchlog")) == 1)
-    assert(tables.count(_.name.name.equalsIgnoreCase("article")) == 1)
-    assert(tables.count(_.name.name.equalsIgnoreCase("feed")) == 1)
-  }
-
-  test("Verifying the schema create/update works") {
-    try {
-      Schema.createOrUpdate(session)
-    } catch {
-      case e : Exception =>
-        fail(e.getMessage)
-    }
+  def before() = {
+    session = Schema.getSession
   }
 
 
-  test("Inserting a feed works") {
-    val insertCount = insertFeed()
-    assert(insertCount == 1)
-  }
+   "TablesSuite" should {
+     "Recreate the schema" in {
+       cleanDB()
+       val tables = MTable.getTables.list
+       tables.count(_.name.name.equalsIgnoreCase("fetchlog")) should be equalTo 1
+       tables.count(_.name.name.equalsIgnoreCase("article")) should be equalTo 1
+       tables.count(_.name.name.equalsIgnoreCase("feed")) should be equalTo 1
+     }
 
-  test("Query feeds works") {
-    val results = feeds.list
-    assert(results.size == 1)
-    assert(results.head.feedurl == "url")
-    assert(results.head.link == Option("link"))
-  }
+//       "Verifying the schema create/update works" in {
+//         try {
+//           Schema.createOrUpdate(session)
+//         } catch {
+//           case e : Exception =>
+//             fail(e.getMessage)
+//         }
+//       }
 
-  test("Inserting a article works") {
-    val insertCount = insertArticle()
-    assert(insertCount == 1)
-  }
+     "Insert a feed" in  {
+       insertFeed() should be equalTo 1
+     }
 
-  test("Query article works") {
-    val results = articles.filter (_.title === "article title").list
-    assert(results.size == 1)
-    assert(results.head.id == Option(1))
-    assert(results.head.title == Option("article title"))
-  }
+     "Query feeds" in {
+       val results = feeds.filter(_.feedurl === testFeedUrl ).list
+       results.size should be equalTo 1
+       results.head.feedurl must be equalTo testFeedUrl
+       results.head.link must be equalTo Option("link")
+     }
+
+     "Insert an article" in {
+       insertArticle() must be equalTo 1
+     }
+
+     "Query articles" in {
+       val results = articles.filter (_.title === "article title").list
+       results.size must be equalTo 1
+       results.head.id must be equalTo Option(1)
+       results.head.title must be equalTo Option("article title")
+     }
+
+     "Join feed with article" in {
+       val exisitingFeed = feeds.filter(_.feedurl === testFeedUrl ).list.head
+       val articleUri = "uri2"
+       articles += Tables.ArticleRow(feedid = exisitingFeed.id, uri = articleUri , title = Option("article 2"))
+       val joinQuery: Query[(Column[String], Column[Option[String]]), (String, Option[String]), Seq] = for {
+         a <- articles if a.feedid === exisitingFeed.id
+         f <- a.feed
+       } yield (a.uri, f.title)
+       val joinedResults = joinQuery.filter(_._1 === articleUri ).list
+       joinedResults.size must be equalTo 1
+       joinedResults.head._1 must be equalTo articleUri
+       joinedResults.head._2 must be equalTo Option("feed title")
+     }
+
+     "Insert a fetchlog" in {
+       insertFetchLog() must be equalTo 1
+     }
+
+     "Query fetchlogs" in {
+       val results = fetchlog.list
+       results.size must be equalTo 1
+       results.head.uri must be equalTo "log-uri"
+       results.head.result must be equalTo Option("result")
+     }
+
+   }
 
 
-  test("Join works"){
-    val exisitingFeed = feeds.list.head
-    articles += Tables.ArticleRow(feedid = exisitingFeed.id, uri = "uri2", title = Option("article 2"))
-    val joinQuery: Query[(Column[String], Column[Option[String]]), (String, Option[String]), Seq] = for {
-      a <- articles //if a.feedid == exisitingFeed.id
-      f <- a.feed
-    } yield (a.uri, f.title)
-    val joinedResults = joinQuery.list.filter(_._1 == "uri2")
-    assert(joinedResults.size == 1)
-    assert(joinedResults.head._1 == "uri2")
-    assert(joinedResults.head._2 == Option("feed title"))
-  }
+  def after() = session.close()
 
-  test("Inserting a fetchlog works") {
-    val insertCount = insertFetchLog()
-    assert(insertCount == 1)
-  }
-
-  test("Query fetchlog works") {
-    val results = fetchlog.list
-    assert(results.size == 1)
-    assert(results.head.uri == "log-uri")
-    assert(results.head.result == Option("result"))
-  }
-
-  after {
-    session.close()
-  }
 
 }

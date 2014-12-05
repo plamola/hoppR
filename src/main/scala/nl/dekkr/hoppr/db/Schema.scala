@@ -11,27 +11,37 @@ import scala.slick.driver.PostgresDriver.simple._
  */
 object Schema {
 
+  def getSession : Session = getConfiguredSession( ConfigFactory.load )
 
   def createOrUpdate(implicit session: Session) {
     val existingTables = MTable.getTables.list
-    if (!existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
-      Tables.Feeds.ddl.create
+    if (existingTables.isEmpty) {
+      createAll
     } else {
-      // Update existing table structure
-    }
-    if (!existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
-      Tables.Articles.ddl.create
-    } else {
-      // Update existing table structure
-    }
-    if (!existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
-      Tables.FetchLog.ddl.create
-    } else {
-      // Update existing table structure
+      if (!existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
+        Tables.Feeds.ddl.create
+      } else {
+        // Update existing table structure
+      }
+      if (!existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
+        Tables.Articles.ddl.create
+      } else {
+        // Update existing table structure
+      }
+      if (!existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
+        Tables.FetchLog.ddl.create
+      } else {
+        // Update existing table structure
+      }
     }
   }
 
-  def getSession : Session = getConfiguredSession( ConfigFactory.load )
+
+  def createAll(implicit session: Session): Unit = {
+    Tables.Feeds.ddl.create
+    Tables.Articles.ddl.create
+    Tables.FetchLog.ddl.create
+  }
 
 
   private def getConfiguredSession(conf : Config) = {
