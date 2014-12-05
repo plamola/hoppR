@@ -1,4 +1,4 @@
-package nl.dekkr.rss.old
+package nl.dekkr.hoppr.rss.old
 
 /**
  * Author: matthijs 

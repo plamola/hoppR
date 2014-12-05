@@ -3,14 +3,14 @@ package nl.dekkr.hoppr.model
 import nl.dekkr.hoppr.db.{Schema, Tables}
 import nl.dekkr.hoppr.db.Tables.FetchLog
 import nl.dekkr.hoppr.db.Tables.FetchLogRow
-import nl.nl.dekkr.hoppr.model.{Info, Debug, Error, LogLevel}
+import scala.language.{postfixOps, implicitConversions}
 import scala.slick.driver.PostgresDriver.simple._
 
 import scala.slick.lifted.TableQuery
 
 
 /**
- * Created by Matthijs Dekker on 25/11/14.
+ * Log results of fetch actions
  */
 object FetchLogger {
 

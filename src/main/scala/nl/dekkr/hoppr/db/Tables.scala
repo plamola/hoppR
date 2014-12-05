@@ -1,6 +1,7 @@
 package nl.dekkr.hoppr.db
 
-import nl.nl.dekkr.hoppr.model.{Info, Error, Warning, Critical, Debug, LogLevel}
+import nl.dekkr.hoppr.model._
+
 
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {

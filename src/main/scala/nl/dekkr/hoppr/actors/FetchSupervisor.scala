@@ -6,11 +6,11 @@ import nl.dekkr.hoppr.actors.SyndicationActor.GetFeed
 import nl.dekkr.hoppr.db.Schema
 import akka.event.Logging
 import akka.routing.FromConfig
-import nl.dekkr.hoppr.model.FetchLogger
+import nl.dekkr.hoppr.model.{Syndication, FetchLogger}
 
 
 import akka.actor.{Props, Actor}
-import nl.nl.dekkr.hoppr.model.Syndication
+import nl.dekkr.hoppr.model.Syndication
 
 /**
  * Author: matthijs 

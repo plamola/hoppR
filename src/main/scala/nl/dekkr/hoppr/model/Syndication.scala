@@ -1,4 +1,4 @@
-package nl.nl.dekkr.hoppr.model
+package nl.dekkr.hoppr.model
 
 import com.sun.syndication.feed.synd.{SyndContent, SyndEntry, SyndFeed}
 import nl.dekkr.hoppr.db.Tables.{ArticleRow, FeedRow}
@@ -10,7 +10,7 @@ import scala.slick.lifted.TableQuery
 
 
 /**
- * Created by Matthijs Dekker on 24/11/14.
+ * Handles syndication processing
  */
 object Syndication {
 

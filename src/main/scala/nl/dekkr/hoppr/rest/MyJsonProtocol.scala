@@ -1,10 +1,10 @@
-package nl.nl.dekkr.hoppr.rest
+package nl.dekkr.hoppr.rest
 
 import nl.dekkr.hoppr.db.Tables.FetchLogRow
 import spray.json._
 
 /**
- * Created by Matthijs Dekker on 25/11/14.
+ * Convert to and from JSON
  */
 object MyJsonProtocol extends DefaultJsonProtocol {
   implicit object FetchLogRowJsonFormat extends RootJsonFormat[ FetchLogRow ] {

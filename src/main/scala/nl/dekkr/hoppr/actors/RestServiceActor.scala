@@ -1,10 +1,11 @@
 package nl.dekkr.hoppr.actors
 
 /**
- * Created by Matthijs Dekker on 25/11/14.
+ * Actor which handles REST calls
  */
 import akka.actor.Actor
-import nl.nl.dekkr.hoppr.rest.RestService
+import nl.dekkr.hoppr.rest.RestService
+
 
 
 

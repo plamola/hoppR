@@ -1,17 +1,16 @@
-package nl.nl.dekkr.hoppr.rest
+package nl.dekkr.hoppr.rest
 
-import nl.dekkr.hoppr.model.FetchLogger
-import nl.nl.dekkr.hoppr.model.Syndication
+import nl.dekkr.hoppr.model.{Syndication, FetchLogger}
 import spray.http.MediaTypes._
 import spray.httpx.marshalling._
 import spray.routing.HttpService
 
 /**
- * Created by Matthijs Dekker on 25/11/14.
+ * REST Service definition
  */
 // this trait defines our service behavior independently from the service actor
 trait RestService extends HttpService {
-  import nl.nl.dekkr.hoppr.rest.MyJsonProtocol._
+  import nl.dekkr.hoppr.rest.MyJsonProtocol._
   import spray.httpx.SprayJsonSupport._
 
 

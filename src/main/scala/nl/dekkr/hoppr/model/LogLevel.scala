@@ -1,9 +1,7 @@
-package nl.nl.dekkr.hoppr.model
-
-
+package nl.dekkr.hoppr.model
 
 /**
- * Created by Matthijs Dekker on 25/11/14.
+ * The different loglevels used in the FetchLog
  */
 sealed trait LogLevel
 case object Critical extends LogLevel

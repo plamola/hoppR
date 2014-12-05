@@ -1,6 +1,6 @@
-import akka.actor.ActorRefFactory
+import akka.actor.{ActorSystem, ActorRefFactory}
 import nl.dekkr.hoppr.db.{Tables, Schema}
-import nl.nl.dekkr.hoppr.rest.RestService
+import nl.dekkr.hoppr.rest.RestService
 import scala.slick.driver.PostgresDriver.simple._
 import org.scalatest.prop.Configuration
 import org.specs2.mutable.Specification
@@ -22,7 +22,7 @@ with Configuration { //with BeforeAndAfter {
   args(sequential = true)
 
   // connects the DSL to the test ActorSystem
-  implicit def actorRefFactory = system
+  implicit def actorRefFactory: ActorSystem = system
 
 //  val spec = this
 
