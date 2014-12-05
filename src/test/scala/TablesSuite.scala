@@ -25,7 +25,7 @@ class TablesSuite extends FunSuite with BeforeAndAfter {
 
   before {
     session =
-      Schema.getTestSession
+      Schema.getSession
   }
 
   test("Recreating the schema") {

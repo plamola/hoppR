@@ -32,7 +32,6 @@ object Schema {
   }
 
   def getSession : Session = getConfiguredSession( ConfigFactory.load )
-  def getTestSession : Session = getConfiguredSession( ConfigFactory.load("application.test.conf") )
 
 
   private def getConfiguredSession(conf : Config) = {
