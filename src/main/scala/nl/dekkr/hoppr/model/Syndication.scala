@@ -1,12 +1,16 @@
 package nl.dekkr.hoppr.model
 
 import com.sun.syndication.feed.synd.{SyndContent, SyndEntry, SyndFeed}
-import nl.dekkr.hoppr.db.Tables.{ArticleRow, FeedRow}
 import nl.dekkr.hoppr.db.{Schema, Tables}
 import org.joda.time.DateTime
 
 import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.lifted.TableQuery
+
+
+case class Feed(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, nextupdate : Long = DateTime.now().getMillis, lastarticlecount: Int = 0, faviconfk: Int = 0)
+
+case class Article(id: Option[Int] = None, feedid: Option[Int] = None, uri: String, link: Option[String] = None, title: Option[String] = None, content: Option[String] = None, author: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: Option[DateTime] = None, lastsynceddate: Option[DateTime] = None)
 
 
 /**
@@ -17,13 +21,13 @@ object Syndication {
   implicit val session = Schema.getSession
 
   def getFeedsForUpdate : List[String] = {
-    val feeds = TableQuery[Tables.Feeds]
+    val feeds = TableQuery[Tables.FeedTable]
     for {c <- feeds.list if c.nextupdate < DateTime.now().getMillis } yield c.feedurl
   }
 
 
   def setNextUpdate(uri: String): Unit = {
-    val feeds = TableQuery[Tables.Feeds]
+    val feeds = TableQuery[Tables.FeedTable]
     val q = for { c <- feeds if c.feedurl === uri } yield c.nextupdate
     // TODO use the interval set in the feed, not the hard-coded value of 60
     q.update(DateTime.now().plusMinutes(60).getMillis)
@@ -34,23 +38,23 @@ object Syndication {
 
   def storeFeed(uri: String, content: SyndFeed): Int = {
     var newArticleCount : Int = 0
-    val feeds = TableQuery[Tables.Feeds]
+    val feeds = TableQuery[Tables.FeedTable]
     // get the feed from the db
     for ( feed <- feeds if feed.feedurl === uri ) {
-      Tables.Feeds.filter(_.id === feed.id.get).update(makeFeedRow(uri, feed.id, feed.faviconfk, feed.updateInterval, content))
+      Tables.feedTable.filter(_.id === feed.id.get).update(makeFeedRow(uri, feed.id, feed.faviconfk, feed.updateInterval, content))
       // iterate through articles
       val it = content.getEntries.iterator()
       while (it.hasNext) {
         val entry: SyndEntry = it.next().asInstanceOf[SyndEntry]
         // get existing article
-        val q = TableQuery[Tables.Articles].filter(a => a.feedid === feed.id.get && a.uri === entry.getUri)
+        val q = TableQuery[Tables.ArticleTable].filter(a => a.feedid === feed.id.get && a.uri === entry.getUri)
         if (q.list.size > 0) {
           // update existing article
           val article = q.first
-          Tables.Articles.filter(_.id === article.id.get).update(makeArticleRow(article.id, article.feedid, entry))
+          Tables.articleTable.filter(_.id === article.id.get).update(makeArticleRow(article.id, article.feedid, entry))
         } else {
           // insert new article
-          Tables.Articles += makeArticleRow(None, feed.id, entry)
+          Tables.articleTable += makeArticleRow(None, feed.id, entry)
           newArticleCount += 1
         }
       }
@@ -59,8 +63,8 @@ object Syndication {
   }
 
 
-  private def makeArticleRow(articleId : Option[Int], feedFk: Option[Int], entry : SyndEntry) : ArticleRow = {
-    new ArticleRow(
+  private def makeArticleRow(articleId : Option[Int], feedFk: Option[Int], entry : SyndEntry) : Article = {
+    new Article(
       id = articleId,
       feedid = feedFk,
       uri = entry.getUri,
@@ -75,8 +79,8 @@ object Syndication {
   }
 
 
-  private def makeFeedRow(uri: String, feedId : Option[Int], faviconfk : Int, interval : Int, content: SyndFeed) : FeedRow = {
-    new FeedRow(
+  private def makeFeedRow(uri: String, feedId : Option[Int], faviconfk : Int, interval : Int, content: SyndFeed) : Feed = {
+    new Feed(
     id = feedId,
     faviconfk = faviconfk,
     feedurl = {if (content.getUri != null) content.getUri else uri },
@@ -115,9 +119,9 @@ object Syndication {
 
 
   def addNewFeed(url: String): Int = {
-    val feeds = TableQuery[Tables.Feeds]
+    val feeds = TableQuery[Tables.FeedTable]
     if (feeds.filter(_.feedurl === url  ).list.size == 0)
-      feeds += Tables.FeedRow( feedurl = url)
+      feeds += Feed( feedurl = url)
     val feed = feeds.filter(_.feedurl === url  ).first
     feed.id.getOrElse(0)
   }

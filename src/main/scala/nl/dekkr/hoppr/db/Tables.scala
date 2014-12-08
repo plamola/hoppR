@@ -20,9 +20,6 @@ trait Tables {
   import scala.slick.lifted.{ProvenShape, ForeignKeyQuery}
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-  //lazy val ddl = Suppliers.ddl ++ Coffees.ddl ++ Articles.ddl ++ Feeds.ddl
-  lazy val ddl = FetchLog.ddl ++ Articles.ddl ++ Feeds.ddl
-
   implicit val loglevelColumnType = MappedColumnType.base[LogLevel, Int](
   {  b =>
     if (b == Critical) 1 else
@@ -42,25 +39,20 @@ trait Tables {
   )
 
 
-
-  case class FetchLogRow(id: Option[Int] = None, uri: String, result: Option[String] = None,  logdate: DateTime = DateTime.now(), level : LogLevel = Info)
-
-  class FetchLog(tag: Tag) extends Table[FetchLogRow](tag, "fetchlog") {
+  class FetchLogTable(tag: Tag) extends Table[FetchLog](tag, "fetchlog") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val uri: Column[String] = column[String]("uri", O.Length(1024, varying = true))
     val result : Column[Option[String]] = column[Option[String]]("result", O.Length(1024, varying = true), O.Default(None))
     val logdate: Column[DateTime] = column[DateTime]("logdate")
     val level : Column[LogLevel] = column[LogLevel]("loglevel")
 
-    def * : ProvenShape[FetchLogRow] =
-      (id.?, uri, result, logdate, level) <>(FetchLogRow.tupled, FetchLogRow.unapply)
+    def * : ProvenShape[FetchLog] =
+      (id.?, uri, result, logdate, level) <>(FetchLog.tupled, FetchLog.unapply)
   }
-  lazy val FetchLog = new TableQuery(tag => new FetchLog(tag))
+  lazy val fetchLogTable = new TableQuery(tag => new FetchLogTable(tag))
 
 
-  case class ArticleRow(id: Option[Int] = None, feedid: Option[Int] = None, uri: String, link: Option[String] = None, title: Option[String] = None, content: Option[String] = None, author: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: Option[DateTime] = None, lastsynceddate: Option[DateTime] = None)
-
-  class Articles(tag: Tag) extends Table[ArticleRow](tag, "article") {
+  class ArticleTable(tag: Tag) extends Table[Article](tag, "article") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val feedid: Column[Int] = column[Int]("feedid")
     val uri: Column[String] = column[String]("uri", O.Length(1024, varying = true))
@@ -75,19 +67,16 @@ trait Tables {
     /** Uniqueness Index over (feedid, uri)  **/
     def idx = index("unique_feedid_uri", (feedid, uri), unique = true)
 
-    def * : ProvenShape[ArticleRow] =
-      (id.?, feedid.?, uri, link, title, content, author, publisheddate, updateddate, lastsynceddate) <>(ArticleRow.tupled, ArticleRow.unapply)
+    def * : ProvenShape[Article] =
+      (id.?, feedid.?, uri, link, title, content, author, publisheddate, updateddate, lastsynceddate) <>(Article.tupled, Article.unapply)
 
-    def feed: ForeignKeyQuery[Feeds, FeedRow] =
-      foreignKey("feed_fk", feedid, TableQuery[Feeds])(_.id)
+    def feed: ForeignKeyQuery[FeedTable, Feed] =
+      foreignKey("feed_fk", feedid, TableQuery[FeedTable])(_.id)
   }
-  lazy val Articles = new TableQuery(tag => new Articles(tag))
+  lazy val articleTable = new TableQuery(tag => new ArticleTable(tag))
 
 
-
-  case class FeedRow(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, nextupdate : Long = DateTime.now().getMillis, lastarticlecount: Int = 0, faviconfk: Int = 0)
-
-  class Feeds(tag: Tag) extends Table[FeedRow](tag, "feed") {
+  class FeedTable(tag: Tag) extends Table[Feed](tag, "feed") {
     val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val feedurl: Column[String] = column[String]("feedurl", O.Length(1024, varying = true))
     val link: Column[Option[String]] = column[Option[String]]("link", O.Length(1024, varying = true), O.Default(None))
@@ -104,10 +93,10 @@ trait Tables {
     /** Uniqueness Index over (feedurl) (database name feed_feedurl_key) */
     val index1 = index("feed_feedurl_key", feedurl, unique = true)
 
-    def * : ProvenShape[FeedRow] =
-      (id.?, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, nextupdate, lastarticlecount, faviconfk) <>(FeedRow.tupled, FeedRow.unapply)
+    def * : ProvenShape[Feed] =
+      (id.?, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, nextupdate, lastarticlecount, faviconfk) <>(Feed.tupled, Feed.unapply)
   }
-  lazy val Feeds = new TableQuery(tag => new Feeds(tag))
+  lazy val feedTable = new TableQuery(tag => new FeedTable(tag))
 
 
 }

@@ -43,13 +43,13 @@ with Configuration {
   private def dropDatabaseTables() : Unit = {
     val existingTables = MTable.getTables.list
     if (existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
-      Tables.FetchLog.ddl.drop
+      Tables.fetchLogTable.ddl.drop
     }
     if (existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
-      Tables.Articles.ddl.drop
+      Tables.articleTable.ddl.drop
     }
     if (existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
-      Tables.Feeds.ddl.drop
+      Tables.feedTable.ddl.drop
     }
   }
 

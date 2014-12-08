@@ -19,17 +19,17 @@ object Schema {
       createAll
     } else {
       if (!existingTables.exists(_.name.name.equalsIgnoreCase("feed"))) {
-        Tables.Feeds.ddl.create
+        Tables.feedTable.ddl.create
       } else {
         // Update existing table structure
       }
       if (!existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
-        Tables.Articles.ddl.create
+        Tables.articleTable.ddl.create
       } else {
         // Update existing table structure
       }
       if (!existingTables.exists(_.name.name.equalsIgnoreCase("fetchlog"))) {
-        Tables.FetchLog.ddl.create
+        Tables.fetchLogTable.ddl.create
       } else {
         // Update existing table structure
       }
@@ -38,9 +38,9 @@ object Schema {
 
 
   def createAll(implicit session: Session): Unit = {
-    Tables.Feeds.ddl.create
-    Tables.Articles.ddl.create
-    Tables.FetchLog.ddl.create
+    Tables.feedTable.ddl.create
+    Tables.articleTable.ddl.create
+    Tables.fetchLogTable.ddl.create
   }
 
 
