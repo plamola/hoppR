@@ -10,6 +10,8 @@ import spray.json._
  */
 object MyJsonProtocol extends DefaultJsonProtocol {
 
+  implicit val UrlFormat = jsonFormat1(Url) // not possible, no support for Joda DateTime
+
 
 //  implicit val FetchLogFormat = jsonFormat5(FetchLog)   // not possible, no support for Joda DateTime
 

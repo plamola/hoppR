@@ -2,8 +2,13 @@ package nl.dekkr.hoppr.rest
 
 import nl.dekkr.hoppr.model.{Syndication, FetchLogger}
 import spray.http.MediaTypes._
+import spray.http.StatusCodes
 import spray.httpx.marshalling._
+import spray.routing.{Directives, HttpService}
+import StatusCodes._
 import spray.routing.HttpService
+
+case class Url(uri: String)
 
 /**
  * REST Service definition
@@ -13,7 +18,29 @@ trait RestService extends HttpService {
   import nl.dekkr.hoppr.rest.MyJsonProtocol._
   import spray.httpx.SprayJsonSupport._
 
+  //TODO Add route for removal of feed
+  //TODO Add route for RSS feed of collected feed
 
+  lazy val index =
+    <html>
+      <body>
+        <h1>This is
+          <i>hoppR</i>
+          !</h1>
+        <p>Defined resources:</p>
+        <ul>
+          <li>
+            <a href="/api/log">/log</a>
+          </li>
+          <li>Add feed:
+            <form action="/api/feed" method="post">
+              <input type="text" name="url"></input>
+              <input type="submit" name="Add feed"/>
+            </form>
+          </li>
+        </ul>
+      </body>
+    </html>
   val myRoute = {
     get {
       pathSingleSlash {
@@ -32,35 +59,20 @@ trait RestService extends HttpService {
       } ~
       post {
         path("feed") {
-          respondWithMediaType(`application/json`) {
-            // TODO Use supplied URL instead of current hard-coded value
-            //Syndication.addNewFeed("test4") match {
-            1 match {
-              case 0 => complete("{result: failure}")
-              case i : Int  => complete(s"{feed : $i}")
+          entity(as[Url]) { url =>
+            // transfer to newly spawned actor
+            //detach() {
+            respondWithMediaType(`application/json`) {
+              Syndication.addNewFeed(url.uri) match {
+                case 0 => complete(BadRequest, "Could not add feed")
+                case i: Int => complete(s"{feed : $i}")
               }
-            }
+              }
+            //}
+          }
         }
       }
     }
   }
-
-
-  lazy val index =
-    <html>
-      <body>
-        <h1>This is <i>hoppR</i>!</h1>
-        <p>Defined resources:</p>
-        <ul>
-          <li><a href="/api/log">/log</a></li>
-          <li> Add feed:
-          <form action="/api/feed" method="post">
-            <input type="text" name="url"></input>
-            <input type="submit" name="Add feed" />
-          </form>
-          </li>
-        </ul>
-      </body>
-    </html>
 
 }
