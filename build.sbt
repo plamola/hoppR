@@ -33,6 +33,7 @@ libraryDependencies ++= List(
   "org.seleniumhq.webdriver" % "webdriver-htmlunit"  % "0.9.7376",
   "org.specs2"               % "specs2_2.11"         % "2.4",
   "postgresql"               % "postgresql"          % "9.1-901.jdbc4",
+  "org.json4s"              %% "json4s-native"       % "3.2.10",
   "rome"                     % "rome"                % "1.0"
 )
 
@@ -47,3 +48,5 @@ scalacOptions ++= Seq(
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+
+parallelExecution in Test := false
