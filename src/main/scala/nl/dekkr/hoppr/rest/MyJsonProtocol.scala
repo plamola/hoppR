@@ -15,11 +15,11 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 
   def stringToLogLevel(s: String): LogLevel = {
     s match {
-      case "info" => Info
-      case "debug" => Debug
-      case "error" => Error
-      case "warn" => Warning
-      case "critical" => Critical
+      case "Info" => Info
+      case "Debug" => Debug
+      case "Error" => Error
+      case "Warn" => Warning
+      case "Critical" => Critical
       case _ => throw new DeserializationException("Invalid log level in Json")
     }
   }
