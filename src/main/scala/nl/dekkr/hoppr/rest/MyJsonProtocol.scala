@@ -26,6 +26,7 @@ object MyJsonProtocol extends DefaultJsonProtocol {
     def read(value: JsValue) : FetchLog = {
       value.asJsObject.getFields("id", "level", "uri", "result", "date") match {
         case Seq(JsNumber(id), JsString(level), JsString(uri), JsString(result), JsString(date)) =>
+          // TODO add id value
           new FetchLog(uri = uri, level = stringToLogLevel(level), result = Option(result),logdate = new DateTime(date))
         case _ => throw new DeserializationException("Fetch log expected")
       }
