@@ -13,6 +13,18 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 
 //  implicit val FetchLogFormat = jsonFormat5(FetchLog)   // not possible, no support for Joda DateTime
 
+  def stringToLogLevel(s: String): LogLevel = {
+    s match {
+      case "info" => Info
+      case "debug" => Debug
+      case "error" => Error
+      case "warn" => Warning
+      case "critical" => Critical
+      case _ => throw new DeserializationException("Invalid log level in Json")
+    }
+  }
+
+
   implicit object FetchLogJsonFormat extends RootJsonFormat[ FetchLog ] {
 
     def write(c: FetchLog) = JsObject(
@@ -32,18 +44,6 @@ object MyJsonProtocol extends DefaultJsonProtocol {
       }
     }
 
-  }
-
-
-  def stringToLogLevel(s: String) : LogLevel = {
-    s match {
-      case "info" => Info
-      case "debug" => Debug
-      case "error" => Error
-      case "warn" => Warning
-      case "critical" => Critical
-      case _ => Info
-    }
   }
 
 
