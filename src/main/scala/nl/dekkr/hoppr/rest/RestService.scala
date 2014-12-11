@@ -18,7 +18,6 @@ trait RestService extends HttpService {
   import nl.dekkr.hoppr.rest.MyJsonProtocol._
   import spray.httpx.SprayJsonSupport._
 
-  //TODO Add route for removal of feed
   //TODO Add route for RSS feed of collected feed
 
   lazy val index =
