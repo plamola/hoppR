@@ -19,6 +19,7 @@ trait RestService extends HttpService {
   import spray.httpx.SprayJsonSupport._
 
   //TODO Add route for RSS feed of collected feed
+  //TODO Actor per request ?
 
   lazy val index =
     <html>
@@ -40,6 +41,7 @@ trait RestService extends HttpService {
         </ul>
       </body>
     </html>
+
   val myRoute = {
     get {
       pathSingleSlash {
@@ -56,51 +58,38 @@ trait RestService extends HttpService {
           }
         }
       } ~
-      post {
         path("feed") {
+          post {
           entity(as[Url]) { url =>
-            // transfer to newly spawned actor
-            //detach() {
             respondWithMediaType(`application/json`) {
               Syndication.addNewFeed(url.uri) match {
                 case feed: Feed => complete(Created, feed)
                 case _ => complete(BadRequest, "Could not add feed")
               }
             }
-            //}
           }
-        }
-      } ~
+          } ~
         delete {
-          path("feed") {
-            entity(as[Url]) { url =>
-              // transfer to newly spawned actor
-              //detach() {
-              respondWithMediaType(`application/json`) {
-                Syndication.removeFeed(url.uri) match {
-                  case 1 => complete(OK)
-                  case 0 => complete(NotFound)
-                  case _ => complete(BadRequest, "Could not remove feed")
+          entity(as[Url]) { url =>
+            respondWithMediaType(`application/json`) {
+              Syndication.removeFeed(url.uri) match {
+                case 1 => complete(OK)
+                case 0 => complete(NotFound)
+                case _ => complete(BadRequest, "Could not remove feed")
               }
             }
-              //}
-          }
           }
         } ~
         get {
-          path("feed") {
-            entity(as[Url]) { url =>
-              // transfer to newly spawned actor
-              //detach() {
-              respondWithMediaType(`application/json`) {
-                Syndication.getFeed(url.uri) match {
-                  case Some(feed) => complete(OK, feed)
-                  case None => complete(NotFound)
-                }
+          entity(as[Url]) { url =>
+            respondWithMediaType(`application/json`) {
+              Syndication.getFeed(url.uri) match {
+                case Some(feed) => complete(OK, feed)
+                case None => complete(NotFound)
               }
-              //}
             }
           }
+        }
       }
     }
   }
