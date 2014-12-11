@@ -23,6 +23,7 @@ class RestServiceSuite extends HopprTestBase {
 
   lazy val logEntry = FetchLog(uri = "log-uri", result = Option("result"))
   implicit val formats = Serialization.formats(NoTypeHints)
+  val url: Url = new Url(uri = "http://test.test.url/")
 
   def before() = {
     session = Schema.getSession
@@ -34,7 +35,6 @@ class RestServiceSuite extends HopprTestBase {
     val fetchLogTable = TableQuery[Tables.FetchLogTable]
     fetchLogTable += logEntry
   }
-
 
   def after() = ???
 
@@ -48,7 +48,6 @@ class RestServiceSuite extends HopprTestBase {
       }
     }
     "add a feed" in {
-      val url: Url = new Url(uri = "http://test.test.url/")
       HttpRequest(POST, "http://localhost:9090/api/feed",
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
@@ -59,6 +58,22 @@ class RestServiceSuite extends HopprTestBase {
         feed.feedurl must be equalTo url.uri
       }
     }
+    "remove a feed" in {
+      HttpRequest(DELETE, "http://localhost:9090/api/feed",
+        entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
+      ) ~> restService ~> check {
+        response.status should be equalTo OK
+      }
+    }
+    "remove a non-existing feed" in {
+      HttpRequest(DELETE, "http://localhost:9090/api/feed",
+        entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
+      ) ~> restService ~> check {
+        response.status should be equalTo NotFound
+      }
+    }
+
+
   }
 
 
