@@ -2,7 +2,6 @@
  * Test the REST services
  */
 
-
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import nl.dekkr.hoppr.model.{Feed, FetchLog}
 import nl.dekkr.hoppr.rest.Url
@@ -14,9 +13,7 @@ import scala.slick.lifted.TableQuery
 import spray.http.HttpMethods._
 import nl.dekkr.hoppr.rest.MyJsonProtocol._
 import spray.httpx.SprayJsonSupport._
-
 import org.json4s._
-import org.json4s.native.Serialization.{read, write}
 
 
 class RestServiceSuite extends HopprTestBase {
@@ -24,6 +21,7 @@ class RestServiceSuite extends HopprTestBase {
   lazy val logEntry = FetchLog(uri = "log-uri", result = Option("result"))
   implicit val formats = Serialization.formats(NoTypeHints)
   val url: Url = new Url(uri = "http://test.test.url/")
+  val ApibaseUrl = "http://" + conf.getString("hoppr.api.interface") + ":" + conf.getInt("hoppr.api.port") + ""
 
   def before() = {
     session = Schema.getSession
@@ -39,7 +37,7 @@ class RestServiceSuite extends HopprTestBase {
   def after() = ???
 
   "Rest service" should {
-    "show log entries" in {
+    "Show log entries" in {
       Get("/api/log") ~> restService ~> check {
         response.status should be equalTo OK
         response.entity should not be equalTo(None)
@@ -47,8 +45,8 @@ class RestServiceSuite extends HopprTestBase {
         responseAs[List[FetchLog]].head.uri must be equalTo logEntry.uri
       }
     }
-    "add a feed" in {
-      HttpRequest(POST, "http://localhost:9090/api/feed",
+    "Add a feed" in {
+      HttpRequest(POST, ApibaseUrl + "/api/feed",
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo Created
@@ -58,15 +56,15 @@ class RestServiceSuite extends HopprTestBase {
         feed.feedurl must be equalTo url.uri
       }
     }
-    "remove a feed" in {
-      HttpRequest(DELETE, "http://localhost:9090/api/feed",
+    "Remove a feed" in {
+      HttpRequest(DELETE, ApibaseUrl + "/api/feed",
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo OK
       }
     }
-    "remove a non-existing feed" in {
-      HttpRequest(DELETE, "http://localhost:9090/api/feed",
+    "Remove a non-existing feed" in {
+      HttpRequest(DELETE, ApibaseUrl + "/api/feed",
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo NotFound

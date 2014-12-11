@@ -1,4 +1,5 @@
 import akka.actor.{ActorSystem, ActorRefFactory}
+import com.typesafe.config.ConfigFactory
 import nl.dekkr.hoppr.db.{Tables, Schema}
 import nl.dekkr.hoppr.rest.RestService
 import scala.slick.driver.PostgresDriver.simple._
@@ -8,7 +9,7 @@ import spray.routing.HttpService
 import spray.testkit.Specs2RouteTest
 
 import scala.slick.jdbc.meta.MTable
-
+import com.typesafe.config.ConfigFactory
 /**
  * Standard Test Base.
  */
@@ -16,21 +17,17 @@ trait HopprTestBase extends Specification
 with Specs2RouteTest with HttpService
 with Configuration {
 
-  implicit var session: Session = _
-
-
-  args(sequential = true)
-
-  // connects the DSL to the test ActorSystem
-  implicit def actorRefFactory: ActorSystem = system
-
   val spec = this
-
   val restService = new RestService {
     override implicit def actorRefFactory: ActorRefFactory = spec.actorRefFactory
   }.myRoute
 
+  args(sequential = true)
+  implicit var session: Session = _
+  implicit var conf = ConfigFactory.load
 
+  // connects the DSL to the test ActorSystem
+  implicit def actorRefFactory: ActorSystem = system
 
   def cleanDB(): Unit = {
     session = Schema.getSession
