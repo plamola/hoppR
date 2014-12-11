@@ -59,7 +59,7 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 
     def read(value: JsValue): Feed = {
       value.asJsObject.getFields("id", "feedurl", "description", "link", "title") match {
-        case Seq(JsNumber(id), JsString(feedUrl), JsString(description), JsString(link), JsString(title),) =>
+        case Seq(JsNumber(id), JsString(feedUrl), JsString(description), JsString(link), JsString(title)) =>
           new Feed(id = Option(id.toInt), feedurl = feedUrl, description = Option(description), link = Option(link), title = Option(title))
         case _ =>
           throw new DeserializationException("Feed expected")
