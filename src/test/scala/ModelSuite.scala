@@ -9,6 +9,8 @@ import scala.slick.jdbc.meta.MTable
  */
 class ModelSuite extends HopprTestBase {
 
+  val testUri = "http://test.test.uri"
+
   def before() = {
     session = Schema.getSession
     cleanDB()
@@ -16,10 +18,14 @@ class ModelSuite extends HopprTestBase {
 
   "MdoelSuite" should {
     "Add a feed" in {
-      val testUri = "http://test.test.uri"
       val feed = Syndication.addNewFeed(testUri)
-      //feed.id.get should be equalTo 1
       feed.feedurl must be equalTo testUri
+    }
+    "Remove exising feed" in {
+      Syndication.removeFeed(testUri) must be equalTo 1
+    }
+    "Remove non-exising feed" in {
+      Syndication.removeFeed("http://test.non.existing") must be equalTo 0
     }
   }
 

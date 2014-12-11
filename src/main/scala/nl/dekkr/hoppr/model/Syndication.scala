@@ -19,15 +19,14 @@ case class Article(id: Option[Int] = None, feedid: Option[Int] = None, uri: Stri
 object Syndication {
 
   implicit val session = Schema.getSession
+  val feeds = TableQuery[Tables.FeedTable]
 
   def getFeedsForUpdate : List[String] = {
-    val feeds = TableQuery[Tables.FeedTable]
     for {c <- feeds.list if c.nextupdate < DateTime.now().getMillis } yield c.feedurl
   }
 
 
   def setNextUpdate(uri: String): Unit = {
-    val feeds = TableQuery[Tables.FeedTable]
     val q = for { c <- feeds if c.feedurl === uri } yield c.nextupdate
     // TODO use the interval set in the feed, not the hard-coded value of 60
     q.update(DateTime.now().plusMinutes(60).getMillis)
@@ -38,7 +37,6 @@ object Syndication {
 
   def storeFeed(uri: String, content: SyndFeed): Int = {
     var newArticleCount : Int = 0
-    val feeds = TableQuery[Tables.FeedTable]
     // get the feed from the db
     for ( feed <- feeds if feed.feedurl === uri ) {
       Tables.feedTable.filter(_.id === feed.id.get).update(makeFeedRow(uri, feed.id, feed.faviconfk, feed.updateInterval, content))
@@ -119,10 +117,13 @@ object Syndication {
   }
 
   def addNewFeed(url: String): Feed = {
-    val feeds = TableQuery[Tables.FeedTable]
     if (feeds.filter(_.feedurl === url  ).list.size == 0)
       feeds += Feed( feedurl = url)
     feeds.filter(_.feedurl === url).first
+  }
+
+  def removeFeed(url: String): Int = {
+    feeds.filter(_.feedurl === url).delete
   }
 
 }
