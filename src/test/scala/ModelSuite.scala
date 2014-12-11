@@ -1,7 +1,6 @@
 import nl.dekkr.hoppr.db.Schema
 import nl.dekkr.hoppr.model.Syndication
 
-import scala.slick.jdbc.meta.MTable
 
 /**
  * Author: matthijs 
@@ -24,7 +23,7 @@ class ModelSuite extends HopprTestBase {
     "Remove exising feed" in {
       Syndication.removeFeed(testUri) must be equalTo 1
     }
-    "Remove non-exising feed" in {
+    "Remove non-existing feed" in {
       Syndication.removeFeed("http://test.non.existing") must be equalTo 0
     }
   }
