@@ -10,10 +10,7 @@ import spray.json._
  */
 object MyJsonProtocol extends DefaultJsonProtocol {
 
-  implicit val UrlFormat = jsonFormat1(Url) // not possible, no support for Joda DateTime
-
-
-//  implicit val FetchLogFormat = jsonFormat5(FetchLog)   // not possible, no support for Joda DateTime
+  implicit val UrlFormat = jsonFormat1(Url)
 
   def stringToLogLevel(s: String): LogLevel = {
     s match {
@@ -26,6 +23,8 @@ object MyJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
+
+  //  implicit val FetchLogFormat = jsonFormat5(FetchLog)   // not possible, no support for Joda DateTime
 
   implicit object FetchLogJsonFormat extends RootJsonFormat[ FetchLog ] {
 
@@ -41,12 +40,32 @@ object MyJsonProtocol extends DefaultJsonProtocol {
       value.asJsObject.getFields("id", "level", "uri", "result", "date") match {
         case Seq(JsNumber(id), JsString(level), JsString(uri), JsString(result), JsString(date)) =>
           new FetchLog(id = Option(id.toInt), uri = uri, level = stringToLogLevel(level), result = Option(result), logdate = new DateTime(date))
-        case _ => throw new DeserializationException("Fetch log expected")
+        case _ =>
+          throw new DeserializationException("Fetch log expected")
       }
     }
 
   }
 
+  implicit object FeedJsonFormat extends RootJsonFormat[Feed] {
 
+    def write(c: Feed) = JsObject(
+      "id" -> JsNumber(c.id.get),
+      "feedurl" -> JsString(c.feedurl),
+      "description" -> JsString(c.description.getOrElse("")),
+      "link" -> JsString(c.link.getOrElse("")),
+      "title" -> JsString(c.title.getOrElse(""))
+    )
+
+    def read(value: JsValue): Feed = {
+      value.asJsObject.getFields("id", "feedurl", "description", "link", "title") match {
+        case Seq(JsNumber(id), JsString(feedUrl), JsString(description), JsString(link), JsString(title),) =>
+          new Feed(id = Option(id.toInt), feedurl = feedUrl, description = Option(description), link = Option(link), title = Option(title))
+        case _ =>
+          throw new DeserializationException("Feed expected")
+      }
+    }
+
+  }
 
 }
