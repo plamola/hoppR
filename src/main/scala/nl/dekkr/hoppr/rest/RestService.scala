@@ -82,13 +82,27 @@ trait RestService extends HttpService {
                   case 1 => complete(OK)
                   case 0 => complete(NotFound)
                   case _ => complete(BadRequest, "Could not remove feed")
+              }
+            }
+              //}
+          }
+          }
+        } ~
+        get {
+          path("feed") {
+            entity(as[Url]) { url =>
+              // transfer to newly spawned actor
+              //detach() {
+              respondWithMediaType(`application/json`) {
+                Syndication.getFeed(url.uri) match {
+                  case Some(feed) => complete(OK, feed)
+                  case None => complete(NotFound)
                 }
               }
               //}
             }
           }
       }
-
     }
   }
 

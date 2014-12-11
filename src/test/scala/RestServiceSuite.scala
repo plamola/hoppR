@@ -21,7 +21,11 @@ class RestServiceSuite extends HopprTestBase {
   lazy val logEntry = FetchLog(uri = "log-uri", result = Option("result"))
   implicit val formats = Serialization.formats(NoTypeHints)
   val url: Url = new Url(uri = "http://test.test.url/")
+  val urlNonExistant: Url = new Url(uri = "http://does.not.exist")
+
   val ApibaseUrl = "http://" + conf.getString("hoppr.api.interface") + ":" + conf.getInt("hoppr.api.port") + ""
+
+  val feedApiUrl = ApibaseUrl + "/api/feed"
 
   def before() = {
     session = Schema.getSession
@@ -46,7 +50,7 @@ class RestServiceSuite extends HopprTestBase {
       }
     }
     "Add a feed" in {
-      HttpRequest(POST, ApibaseUrl + "/api/feed",
+      HttpRequest(POST, feedApiUrl,
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo Created
@@ -56,15 +60,32 @@ class RestServiceSuite extends HopprTestBase {
         feed.feedurl must be equalTo url.uri
       }
     }
+    "Get a feed" in {
+      HttpRequest(GET, feedApiUrl,
+        entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
+      ) ~> restService ~> check {
+        response.status should be equalTo OK
+        response.entity should not be equalTo(None)
+        val feed = responseAs[Feed]
+        feed.feedurl must be equalTo url.uri
+      }
+    }
+    "Get a non-existing feed" in {
+      HttpRequest(GET, feedApiUrl,
+        entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(urlNonExistant))
+      ) ~> restService ~> check {
+        response.status should be equalTo NotFound
+      }
+    }
     "Remove a feed" in {
-      HttpRequest(DELETE, ApibaseUrl + "/api/feed",
+      HttpRequest(DELETE, feedApiUrl,
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo OK
       }
     }
     "Remove a non-existing feed" in {
-      HttpRequest(DELETE, ApibaseUrl + "/api/feed",
+      HttpRequest(DELETE, feedApiUrl,
         entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
       ) ~> restService ~> check {
         response.status should be equalTo NotFound
