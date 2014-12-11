@@ -63,8 +63,12 @@ trait RestService extends HttpService {
           entity(as[Url]) { url =>
             respondWithMediaType(`application/json`) {
               Syndication.addNewFeed(url.uri) match {
-                case feed: Feed => complete(Created, feed)
-                case _ => complete(BadRequest, "Could not add feed")
+                case feed: Feed => respondWithStatus(Created) {
+                  complete(feed)
+                }
+                case _ => respondWithStatus(BadRequest) {
+                  complete("Could not add feed")
+                }
               }
             }
           }
@@ -75,7 +79,9 @@ trait RestService extends HttpService {
               Syndication.removeFeed(url.uri) match {
                 case 1 => complete(OK)
                 case 0 => complete(NotFound)
-                case _ => complete(BadRequest, "Could not remove feed")
+                case _ => respondWithStatus(BadRequest) {
+                  complete("Could not remove feed")
+                }
               }
             }
           }
@@ -84,7 +90,9 @@ trait RestService extends HttpService {
           entity(as[Url]) { url =>
             respondWithMediaType(`application/json`) {
               Syndication.getFeed(url.uri) match {
-                case Some(feed) => complete(OK, feed)
+                case Some(feed) => respondWithStatus(OK) {
+                  complete(feed)
+                }
                 case None => complete(NotFound)
               }
             }
