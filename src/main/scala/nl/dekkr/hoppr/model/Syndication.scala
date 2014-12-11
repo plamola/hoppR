@@ -119,8 +119,10 @@ object Syndication {
   def addNewFeed(url: String): Feed = {
     if (feeds.filter(_.feedurl === url  ).list.size == 0)
       feeds += Feed( feedurl = url)
-    feeds.filter(_.feedurl === url).first
+    getFeed(url).get
   }
+
+  def getFeed(url: String): Option[Feed] = feeds.filter(_.feedurl === url).firstOption
 
   def removeFeed(url: String): Int = {
     feeds.filter(_.feedurl === url).delete
