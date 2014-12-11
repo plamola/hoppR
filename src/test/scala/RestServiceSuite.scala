@@ -4,25 +4,31 @@
 
 
 import nl.dekkr.hoppr.db.{Tables, Schema}
-import nl.dekkr.hoppr.model.FetchLog
+import nl.dekkr.hoppr.model.{Feed, FetchLog}
+import nl.dekkr.hoppr.rest.Url
+import org.json4s.native.Serialization
+import spray.http.{MediaTypes, HttpRequest, HttpEntity}
 import scala.slick.driver.PostgresDriver.simple._
-import scala.slick.jdbc.meta._
 import spray.http.StatusCodes._
-
 import scala.slick.lifted.TableQuery
+import spray.http.HttpMethods._
 import nl.dekkr.hoppr.rest.MyJsonProtocol._
 import spray.httpx.SprayJsonSupport._
 
+import org.json4s._
+import org.json4s.native.Serialization.{read, write}
+
 
 class RestServiceSuite extends HopprTestBase {
+
+  lazy val logEntry = FetchLog(uri = "log-uri", result = Option("result"))
+  implicit val formats = Serialization.formats(NoTypeHints)
 
   def before() = {
     session = Schema.getSession
     cleanDB()
     createTestData()
   }
-
-  lazy val logEntry = FetchLog(uri = "log-uri", result = Option("result"))
 
   def createTestData(): Unit = {
     val fetchLogTable = TableQuery[Tables.FetchLogTable]
@@ -41,7 +47,18 @@ class RestServiceSuite extends HopprTestBase {
         responseAs[List[FetchLog]].head.uri must be equalTo logEntry.uri
       }
     }
-
+    "add a feed" in {
+      val url: Url = new Url(uri = "http://test.test.url/")
+      HttpRequest(POST, "http://localhost:9090/api/feed",
+        entity = HttpEntity(MediaTypes.`application/json`, Serialization.write(url))
+      ) ~> restService ~> check {
+        response.status should be equalTo Created
+        response.entity should not be equalTo(None)
+        val feed = responseAs[Feed]
+        feed.id.get must be greaterThan 0
+        feed.feedurl must be equalTo url.uri
+      }
+    }
   }
 
 
