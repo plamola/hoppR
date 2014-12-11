@@ -1,6 +1,6 @@
 package nl.dekkr.hoppr.rest
 
-import nl.dekkr.hoppr.model.{Syndication, FetchLogger}
+import nl.dekkr.hoppr.model.{Feed, Syndication, FetchLogger}
 import spray.http.MediaTypes._
 import spray.http.StatusCodes
 import spray.httpx.marshalling._
@@ -64,8 +64,8 @@ trait RestService extends HttpService {
             //detach() {
             respondWithMediaType(`application/json`) {
               Syndication.addNewFeed(url.uri) match {
-                case 0 => complete(BadRequest, "Could not add feed")
-                case i: Int => complete(s"{feed : $i}")
+                case feed: Feed => complete(Created, feed)
+                case _ => complete(BadRequest, "Could not add feed")
               }
               }
             //}

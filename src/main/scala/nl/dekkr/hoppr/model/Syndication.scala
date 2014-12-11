@@ -78,30 +78,10 @@ object Syndication {
     )
   }
 
-
-  private def makeFeedRow(uri: String, feedId : Option[Int], faviconfk : Int, interval : Int, content: SyndFeed) : Feed = {
-    new Feed(
-    id = feedId,
-    faviconfk = faviconfk,
-    feedurl = {if (content.getUri != null) content.getUri else uri },
-    link = Some(content.getLink),
-    title = Some(content.getTitle),
-    description = Some(content.getDescription),
-    publisheddate = toJodaDateTime(content.getPublishedDate),
-    updateddate = DateTime.now(),
-    image = { if (content.getImage != null ) Some(content.getImage.getUrl) else None },
-    nextupdate = DateTime.now().plusMinutes(interval).getMillis,
-    updateInterval = interval,
-    lastarticlecount = content.getEntries.size()
-    )
-  }
-
-
   // Needed because postgres didn't like the original date types
-  private def toJodaDateTime(date : java.util.Date) : Option[DateTime] = {
+  private def toJodaDateTime(date: java.util.Date): Option[DateTime] = {
     if (date != null) Some(new DateTime(date)) else None
   }
-
 
   private def extractContent(entry: SyndEntry): String = {
     var content: String = ""
@@ -117,13 +97,32 @@ object Syndication {
     content
   }
 
+  private def makeFeedRow(uri: String, feedId: Option[Int], faviconfk: Int, interval: Int, content: SyndFeed): Feed = {
+    new Feed(
+      id = feedId,
+      faviconfk = faviconfk,
+      feedurl = {
+        if (content.getUri != null) content.getUri else uri
+      },
+      link = Some(content.getLink),
+      title = Some(content.getTitle),
+      description = Some(content.getDescription),
+      publisheddate = toJodaDateTime(content.getPublishedDate),
+      updateddate = DateTime.now(),
+      image = {
+        if (content.getImage != null) Some(content.getImage.getUrl) else None
+      },
+      nextupdate = DateTime.now().plusMinutes(interval).getMillis,
+      updateInterval = interval,
+      lastarticlecount = content.getEntries.size()
+    )
+  }
 
-  def addNewFeed(url: String): Int = {
+  def addNewFeed(url: String): Feed = {
     val feeds = TableQuery[Tables.FeedTable]
     if (feeds.filter(_.feedurl === url  ).list.size == 0)
       feeds += Feed( feedurl = url)
-    val feed = feeds.filter(_.feedurl === url  ).first
-    feed.id.getOrElse(0)
+    feeds.filter(_.feedurl === url).first
   }
 
 }
