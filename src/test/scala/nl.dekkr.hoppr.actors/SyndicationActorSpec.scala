@@ -37,6 +37,13 @@ class SyndicationActorSpec extends TestKit(ActorSystem()) with SpecificationLike
          content.getTitle equals "Dekkr Projects"
       }
     }
+
+    "get content from index page (failure)" in {
+      syndication ! GetFeed("http://blog.dekkr.nl/")
+      expectMsg(FeedException("http://blog.dekkr.nl/", "Invalid XML: Error on line 52: The element type \"link\" must be terminated by the matching end-tag \"</link>\"."))
+      success
+    }
+
   }
 
 }
