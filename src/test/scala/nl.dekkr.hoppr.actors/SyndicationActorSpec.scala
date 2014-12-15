@@ -26,7 +26,7 @@ class SyndicationActorSpec extends TestKit(ActorSystem()) with SpecificationLike
 
     "handle result with no content" in {
       syndication ! GetFeed("http://blog.dekkr.nl/thisdoesnotexists")
-      expectMsg(FeedNoContentFound("http://blog.dekkr.nl/thisdoesnotexists"))
+      expectMsg(FeedException("http://blog.dekkr.nl/thisdoesnotexists", "404: Not Found"))
       success
     }
 
