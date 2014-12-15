@@ -4,7 +4,6 @@ import nl.dekkr.hoppr.model.{Feed, Syndication, FetchLogger}
 import spray.http.MediaTypes._
 import spray.http.StatusCodes
 import spray.httpx.marshalling._
-import spray.routing.{Directives, HttpService}
 import StatusCodes._
 import spray.routing.HttpService
 
@@ -61,46 +60,51 @@ trait RestService extends HttpService {
       } ~
         path("feed") {
           post {
-          entity(as[Url]) { url =>
-            respondWithMediaType(`application/json`) {
-              Syndication.addNewFeed(url.uri) match {
-                case feed: Feed => respondWithStatus(Created) {
-                  complete(feed)
-                }
-                case _ => respondWithStatus(BadRequest) {
-                  complete("Could not add feed")
+            entity(as[Url]) { url =>
+              respondWithMediaType(`application/json`) {
+                Syndication.addNewFeed(url.uri) match {
+                  case feed: Feed => respondWithStatus(Created) {
+                    complete(feed)
+                  }
+                  case _ => respondWithStatus(BadRequest) {
+                    complete("Could not add feed")
+                  }
                 }
               }
             }
-          }
           } ~
-        delete {
-          entity(as[Url]) { url =>
-            respondWithMediaType(`application/json`) {
-              Syndication.removeFeed(url.uri) match {
-                case 1 => complete(OK)
-                case 0 => complete(NotFound)
-                case _ => respondWithStatus(BadRequest) {
-                  complete("Could not remove feed")
+            delete {
+              entity(as[Url]) { url =>
+                respondWithMediaType(`application/json`) {
+                  Syndication.removeFeed(url.uri) match {
+                    case 1 => complete(OK)
+                    case 0 => complete(NotFound)
+                    case _ => respondWithStatus(BadRequest) {
+                      complete("Could not remove feed")
+                    }
+                  }
+                }
+              }
+            } ~
+            get {
+              entity(as[Url]) { url =>
+                respondWithMediaType(`application/json`) {
+                  Syndication.getFeed(url.uri) match {
+                    case Some(feed) => respondWithStatus(OK) {
+                      complete(feed)
+                    }
+                    case None => complete(NotFound)
+                  }
                 }
               }
             }
-          }
         } ~
-        get {
-          entity(as[Url]) { url =>
-            respondWithMediaType(`application/json`) {
-              Syndication.getFeed(url.uri) match {
-                case Some(feed) => respondWithStatus(OK) {
-                  complete(feed)
-                }
-                case None => complete(NotFound)
-              }
-            }
+        path("rss" / IntNumber) { feedId =>
+          get {
+            complete(s"$feedId")
+          }
           }
         }
       }
-    }
-  }
 
 }

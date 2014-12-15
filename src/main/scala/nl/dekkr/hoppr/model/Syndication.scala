@@ -20,6 +20,7 @@ object Syndication {
 
   implicit val session = Schema.getSession
   val feeds = TableQuery[Tables.FeedTable]
+  val articles = TableQuery[Tables.ArticleTable]
 
   def getFeedsForUpdate : List[String] = {
     for {c <- feeds.list if c.nextupdate < DateTime.now().getMillis } yield c.feedurl
@@ -122,6 +123,10 @@ object Syndication {
   }
 
   def getFeed(url: String): Option[Feed] = feeds.filter(_.feedurl === url).firstOption
+
+  def getFeedById(id: Int): Option[Feed] = feeds.filter(_.id === id).firstOption
+
+  def getArticles(feedId: Int, max: Int) = articles.filter(_.feedid === feedId).take(max).sortBy(_.updateddate)
 
   def removeFeed(url: String): Int = {
     feeds.filter(_.feedurl === url).delete
