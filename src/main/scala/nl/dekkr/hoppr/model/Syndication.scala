@@ -25,15 +25,14 @@ object Syndication {
     for {c <- feeds.list if c.nextupdate < DateTime.now().getMillis } yield c.feedurl
   }
 
-
   def setNextUpdate(uri: String): Unit = {
-    val q = for { c <- feeds if c.feedurl === uri } yield c.nextupdate
-    // TODO use the interval set in the feed, not the hard-coded value of 60
-    q.update(DateTime.now().plusMinutes(60).getMillis)
-    val statement = q.updateStatement
-    val invoker = q.updateInvoker
+    val query = feeds.filter(_.feedurl === uri)
+    val feed = query.first
+    val updatedFeed = feed.copy(
+      nextupdate = DateTime.now().plusMinutes(feed.updateInterval).getMillis
+    )
+    query.update(updatedFeed)
   }
-
 
   def storeFeed(uri: String, content: SyndFeed): Int = {
     var newArticleCount : Int = 0
@@ -76,11 +75,6 @@ object Syndication {
     )
   }
 
-  // Needed because postgres didn't like the original date types
-  private def toJodaDateTime(date: java.util.Date): Option[DateTime] = {
-    if (date != null) Some(new DateTime(date)) else None
-  }
-
   private def extractContent(entry: SyndEntry): String = {
     var content: String = ""
     if (entry.getDescription != null) {
@@ -114,6 +108,11 @@ object Syndication {
       updateInterval = interval,
       lastarticlecount = content.getEntries.size()
     )
+  }
+
+  // Needed because postgres didn't like the original date types
+  private def toJodaDateTime(date: java.util.Date): Option[DateTime] = {
+    if (date != null) Some(new DateTime(date)) else None
   }
 
   def addNewFeed(url: String): Feed = {
