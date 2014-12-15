@@ -1,12 +1,18 @@
 package nl.dekkr.hoppr.rest
 
+import java.util.Date
+
 import nl.dekkr.hoppr.model.Syndication
+import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 /**
  * Author: matthijs 
  * Created on: 15 Dec 2014.
  */
 class AtomXml {
+
+  val atomDateFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")
 
   def getAtomFeed(id: Int) = {
     val feed = Syndication.getFeedById(id).get
@@ -19,7 +25,7 @@ class AtomXml {
       <title>feed.name</title>
       <subtitle><![CDATA[feed.feed_subtitle]]></subtitle>
       <rights><![CDATA[feed.copyright]]></rights>
-      <updated>if(feed.last_update != null){@atomDate(feed.last_update)}else{@atomDate(feed.created_at)}</updated>
+      <updated>if(feed.last_update != null){atomDate(feed.last_update)}else{atomDate(feed.created_at)}</updated>
       <logo>feed.logo</logo>
       <icon>feed.feed_icon</icon>
       <id>http://feedfrenzy.nl@routes.Application.atom(feed.feed_key)</id>
@@ -32,12 +38,15 @@ class AtomXml {
           <id>feedItem.uid</id>
           <link href="feedItem.url" rel="alternate" type="text/html"/>
           <published>@atomDate(feedItem.published)</published>
-          <updated>if(feedItem.updated != null){@atomDate(feedItem.updated)}else{@atomDate(feedItem.published)}</updated>
+          <updated>if(feedItem.updated != null){atomDate(feedItem.updated)}else{atomDate(feedItem.published)}</updated>
           <author><name>feedItem.author</name></author>
       </entry>
     }
     </feed>
     */
   }
+
+  private def atomDate(date: DateTime) = if (date != null) date.toString(atomDateFormat)
+
 
 }
