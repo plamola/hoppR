@@ -12,11 +12,15 @@ import scala.collection.JavaConverters._
  */
 object AtomXml {
 
-  def getAtomFeed(id: Int) = {
-    val feed = Syndication.getFeedById(id).get
-    val articles = Syndication.getArticles(feed.id.get, feed.lastarticlecount)
-    val output: SyndFeedOutput = new SyndFeedOutput()
-    output.outputString(wrapFeed("atom_0.3", feed, articles))
+  def getAtomFeed(id: Int) : Option[String] ={
+    Syndication.getFeedById(id) match {
+      case Some(feed) =>
+        val articles = Syndication.getArticles(feed.id.get, feed.lastarticlecount)
+        val output: SyndFeedOutput = new SyndFeedOutput()
+        Some(output.outputString(wrapFeed("atom_0.3", feed, articles)))
+      case None =>  None
+
+    }
   }
 
   private def wrapFeed(feedType: String, feed: Feed, articles: List[Article]) : SyndFeed = {
