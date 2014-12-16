@@ -8,7 +8,7 @@ import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.lifted.TableQuery
 
 
-case class Feed(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, nextupdate : Long = DateTime.now().getMillis, lastarticlecount: Int = 0, faviconfk: Int = 0)
+case class Feed(id: Option[Int] = None, feedurl: String, link: Option[String] = None, title: Option[String] = None, description: Option[String] = None, copyright: Option[String] = None, image: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: DateTime = DateTime.now(), updateInterval: Int = 60, nextupdate : Long = DateTime.now().getMillis, lastarticlecount: Int = 0, faviconfk: Int = 0)
 
 case class Article(id: Option[Int] = None, feedid: Option[Int] = None, uri: String, link: Option[String] = None, title: Option[String] = None, content: Option[String] = None, author: Option[String] = None, publisheddate: Option[DateTime] = None, updateddate: Option[DateTime] = None, lastsynceddate: Option[DateTime] = None)
 
@@ -102,6 +102,9 @@ object Syndication {
       description = Some(content.getDescription),
       publisheddate = toJodaDateTime(content.getPublishedDate),
       updateddate = DateTime.now(),
+      copyright = {
+        if (content.getCopyright != null) Some(content.getCopyright) else None
+      },
       image = {
         if (content.getImage != null) Some(content.getImage.getUrl) else None
       },

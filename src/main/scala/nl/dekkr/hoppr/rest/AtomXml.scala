@@ -33,9 +33,9 @@ object AtomXml {
 
     <feed xmlns="http://www.w3.org/2005/Atom">
       <generator uri="http://hoppr.local/" version="2.0">HoppR</generator>
-      <title>{feed.title.get}</title>
+      <title>{feed.title.getOrElse("Untitled feed")}</title>
       <subtitle><![CDATA[{feed.description}]]></subtitle>
-      <rights><![CDATA[feed.copyright]]></rights>
+      <rights><![CDATA[{feed.copyright}]]></rights>
       <updated>{if(feed.updateddate != null){atomDate(feed.updateddate)}else{atomDate(feed.publisheddate.get)}}</updated>
       <logo>feed.logo</logo>
       <icon>feed.feed_icon</icon>

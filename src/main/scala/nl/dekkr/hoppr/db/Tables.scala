@@ -82,6 +82,7 @@ trait Tables {
     val link: Column[Option[String]] = column[Option[String]]("link", O.Length(1024, varying = true), O.Default(None))
     val title: Column[Option[String]] = column[Option[String]]("title", O.Length(255, varying = true), O.Default(None))
     val description: Column[Option[String]] = column[Option[String]]("description", O.Length(1024, varying = true), O.Default(None))
+    val copyright: Column[Option[String]] = column[Option[String]]("copyright", O.Length(255, varying = true), O.Default(None))
     val image: Column[Option[String]] = column[Option[String]]("image", O.Length(255, varying = true), O.Default(None))
     val publisheddate: Column[Option[DateTime]] = column[Option[DateTime]]("publisheddate", O.Default(None))
     val updateddate: Column[DateTime] = column[DateTime]("updateddate", O.Default(DateTime.now()))
@@ -94,7 +95,7 @@ trait Tables {
     val index1 = index("feed_feedurl_key", feedurl, unique = true)
 
     def * : ProvenShape[Feed] =
-      (id.?, feedurl, link, title, description, image, publisheddate, updateddate, updateInterval, nextupdate, lastarticlecount, faviconfk) <>(Feed.tupled, Feed.unapply)
+      (id.?, feedurl, link, title, description, copyright, image, publisheddate, updateddate, updateInterval, nextupdate, lastarticlecount, faviconfk) <>(Feed.tupled, Feed.unapply)
   }
   lazy val feedTable = new TableQuery(tag => new FeedTable(tag))
 

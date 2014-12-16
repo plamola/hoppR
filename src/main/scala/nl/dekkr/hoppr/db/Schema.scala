@@ -22,6 +22,10 @@ object Schema {
         Tables.feedTable.ddl.create
       } else {
         // Update existing table structure
+       /*
+       ALTER TABLE feed
+       ADD COLUMN  copyright character varying(255) DEFAULT NULL;
+       */
       }
       if (!existingTables.exists(_.name.name.equalsIgnoreCase("article"))) {
         Tables.articleTable.ddl.create
