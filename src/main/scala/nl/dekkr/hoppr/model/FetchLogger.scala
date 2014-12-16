@@ -29,10 +29,14 @@ object FetchLogger {
   def LogError(feedUri: String, fetchResult: String): Int = writeToFetchLog(feedUri, fetchResult, Error)
 
   private def writeToFetchLog(feedUri: String, fetchResult: String, level: LogLevel): Int = {
-    //log.debug(s"[$feedUri] $fetchResult")
     TableQuery[Tables.FetchLogTable] += FetchLog(uri = feedUri, result = Option(fetchResult), level = level)
   }
 
   def getLast100 : List[FetchLog] = TableQuery[Tables.FetchLogTable].take(100).sortBy(_.logdate desc).list
+
+  // TODO filter on level (Critical, Error)
+  def getLast100Errors : List[FetchLog] = TableQuery[Tables.FetchLogTable].take(100).sortBy(_.logdate desc).list
+
+
 
 }

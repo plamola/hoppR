@@ -102,11 +102,15 @@ trait RestService extends HttpService {
         path("rss" / IntNumber) { feedId =>
           get {
             respondWithMediaType(`application/xml`) {
-              AtomXml.getAtomFeed(feedId) match {
-                case Some(output) => complete(output)
-                case None => complete(NotFound)
+              if (feedId == 0) {
+                complete(FeedLogXml.getAtomFeed)
+              } else {
+                AtomXml.getAtomFeed(feedId) match {
+                  case Some(output) => complete(output)
+                  case None => complete(NotFound)
+                }
               }
-              }
+            }
             }
           }
         }
