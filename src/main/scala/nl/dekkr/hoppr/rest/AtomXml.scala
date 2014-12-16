@@ -1,10 +1,10 @@
 package nl.dekkr.hoppr.rest
 
-import java.util.Date
+import com.sun.syndication.feed.synd._
+import com.sun.syndication.io.SyndFeedOutput
+import nl.dekkr.hoppr.model.{Feed, Article, Syndication}
+import scala.collection.JavaConverters._
 
-import nl.dekkr.hoppr.model.Syndication
-import org.joda.time.DateTime
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 /**
  * Author: matthijs 
@@ -12,42 +12,45 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
  */
 object AtomXml {
 
-  val atomDateFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")
-
   def getAtomFeed(id: Int) = {
     val feed = Syndication.getFeedById(id).get
     val articles = Syndication.getArticles(feed.id.get, feed.lastarticlecount)
-
-    val entriesXML =
-      for(feedItem <- articles) {
-        <entry>
-          <title type="html">{feedItem.title}</title>
-          <content type="html">{feedItem.content}</content>
-          <id>{feedItem.uri}</id>
-          <link href="{feedItem.url}" rel="alternate" type="text/html"/>
-          <published>{atomDate(feedItem.publisheddate.get)}</published>
-          <updated>{if(feedItem.updateddate != None){atomDate(feedItem.updateddate.get)}else{atomDate(feedItem.publisheddate.get)}}</updated>
-          <author><name>{feedItem.author}</name></author>
-        </entry>
-      }
-
-    <feed xmlns="http://www.w3.org/2005/Atom">
-      <generator uri="http://hoppr.local/" version="2.0">HoppR</generator>
-      <title>{feed.title.getOrElse("Untitled feed")}</title>
-      <subtitle><![CDATA[{feed.description}]]></subtitle>
-      <rights><![CDATA[{feed.copyright}]]></rights>
-      <updated>{if(feed.updateddate != null){atomDate(feed.updateddate)}else{atomDate(feed.publisheddate.get)}}</updated>
-      <logo>feed.logo</logo>
-      <icon>feed.feed_icon</icon>
-      <id>http://feedfrenzy.nl@routes.Application.atom(feed.feed_key)</id>
-      <link href="feed.alternate_link" rel="alternate" type="text/html"/>
-      <link href="http://hoppr.local@routes.Application.atom(feed.feed_key)" rel="self" />
-      {entriesXML}
-    </feed>
-
+    val output: SyndFeedOutput = new SyndFeedOutput()
+    output.outputString(wrapFeed("atom_0.3", feed, articles))
   }
 
-  private def atomDate(date: DateTime) = if (date != null) date.toString(atomDateFormat)
+  private def wrapFeed(feedType: String, feed: Feed, articles: List[Article]) : SyndFeed = {
+    val feedOut: SyndFeed = new SyndFeedImpl()
+    feedOut.setFeedType(feedType)
+    feedOut.setUri(feed.feedurl)
+    feedOut.setTitle(feed.title.getOrElse("Untitled feed"))
+    if (feed.link != None) feedOut.setLink(feed.link.get)
+    if (feed.description != None) feedOut.setDescription(feed.description.get)
+    if (feed.copyright != None) feedOut.setCopyright(feed.copyright.get)
+    if (feed.publisheddate != None) feedOut.setPublishedDate(feed.publisheddate.get.toDate)
+    feedOut.setEntries(wrapEntries(articles).asJava)
+    feedOut
+  }
+
+
+  private def wrapEntries(articles : List[Article]) :List[SyndEntry] = {
+    if (articles.isEmpty)
+      List.empty
+    else
+      List(wrapFeedEntry(articles.head)) ++ wrapEntries(articles.tail)
+  }
+
+  private def wrapFeedEntry(feedItem : Article) : SyndEntry = {
+    val entry: SyndEntry = new SyndEntryImpl()
+    entry.setTitle(feedItem.title.get)
+    entry.setLink(feedItem.link.get)
+    entry.setPublishedDate(feedItem.publisheddate.get.toDate)
+    val description: SyndContent = new SyndContentImpl()
+    description.setType("text/html")
+    description.setValue(feedItem.content.get)
+    entry.setDescription(description)
+    entry
+  }
 
 
 }
