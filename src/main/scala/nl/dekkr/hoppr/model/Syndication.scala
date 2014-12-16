@@ -126,7 +126,7 @@ object Syndication {
 
   def getFeedById(id: Int): Option[Feed] = feeds.filter(_.id === id).firstOption
 
-  def getArticles(feedId: Int, max: Int) = articles.filter(_.feedid === feedId).take(max).sortBy(_.updateddate)
+  def getArticles(feedId: Int, max: Int) = articles.filter(_.feedid === feedId).take(max).sortBy(_.updateddate).list
 
   def removeFeed(url: String): Int = {
     feeds.filter(_.feedurl === url).delete
