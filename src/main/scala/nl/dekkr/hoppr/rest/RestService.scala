@@ -1,6 +1,7 @@
 package nl.dekkr.hoppr.rest
 
 import nl.dekkr.hoppr.model.{Feed, Syndication, FetchLogger}
+import nl.dekkr.hoppr.rss.{FeedLogOutput, AtomOutput}
 import spray.http.MediaTypes._
 import spray.http.StatusCodes
 import spray.httpx.marshalling._
@@ -101,9 +102,9 @@ trait RestService extends HttpService {
           get {
             respondWithMediaType(`application/xml`) {
               if (feedId == 0) {
-                complete(FeedLogXml.getAtomFeed)
+                complete(FeedLogOutput.getAtomFeed(0).get)
               } else {
-                AtomXml.getAtomFeed(feedId) match {
+                AtomOutput.getAtomFeed(feedId) match {
                   case Some(output) => complete(output)
                   case None => complete(NotFound)
                 }
