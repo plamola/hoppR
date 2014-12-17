@@ -12,7 +12,7 @@ object FeedLogOutput extends FeedToAtom {
 
   override def getAtomFeed(id: Int): Option[String] = {
     val output: SyndFeedOutput = new SyndFeedOutput()
-    Some(output.outputString(wrapFeed("atom_0.3", getAsFeed, convertFetchLogToArticles(FetchLogger.getLast100Errors))))
+    Some(output.outputString(wrapFeed(feedType, getAsFeed, convertFetchLogToArticles(FetchLogger.getLast100Errors))))
   }
 
   def getAsFeed: Feed =
@@ -35,7 +35,8 @@ object FeedLogOutput extends FeedToAtom {
           publisheddate = Option(logEntry.logdate),
           title = Option(s"[${logEntry.level}] ${logEntry.result.getOrElse("<no result logged>")}"),
           content = Option(s"[${logEntry.level}] - ${logEntry.id.get} - ${logEntry.result.getOrElse("<no result logged>")}")
-        )) ++ convertFetchLogToArticles(logEntries.tail)
+        )
+      ) ++ convertFetchLogToArticles(logEntries.tail)
     }
   }
 
