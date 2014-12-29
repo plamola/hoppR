@@ -32,10 +32,14 @@ class FetchSupervisor extends Actor {
   def receive = {
     case Nudge =>
       log.info("#### Looking for updatable content ####")
-      for(url <- Syndication.getFeedsForUpdate) roundRobinRouter ! GetFeed(url)
-      // TODO Implement LinkedIn & Twitter
-      //updateLinkedInSubscriptions()
-      //updateTwitterSearches()
+      try {
+        for (url <- Syndication.getFeedsForUpdate) roundRobinRouter ! GetFeed(url)
+        // TODO Implement LinkedIn & Twitter
+        //updateLinkedInSubscriptions()
+        //updateTwitterSearches()
+      } catch {
+        case e: Exception => log.error(s"${e.getMessage} [${e.getCause}}]")
+      }
 
     case SyndicationActor.FeedContent(url, content: SyndFeed) =>
      Syndication.storeFeed(url, content) match {

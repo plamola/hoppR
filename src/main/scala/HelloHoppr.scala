@@ -15,26 +15,28 @@ import scala.concurrent.ExecutionContext.Implicits.global
 // The main application
 object HelloHoppr extends App with BootedCore with CoreActors {
 
+  try {
+    val feeds = TableQuery[Tables.FeedTable]
+    implicit val session = Schema.getSession
+    Schema.createOrUpdate(session)
 
-  val feeds = TableQuery[Tables.FeedTable]
-  implicit val session = Schema.getSession
-  Schema.createOrUpdate(session)
+    // Add some dummy feeds
+    if (feeds.list.size < 1)
+      feeds += Feed(feedurl = "http://blog.dekkr.nl/rss", link = Option("link"), title = Option("feed title"))
 
-  // Add some dummy feeds
-  if (feeds.list.size < 1)
-    feeds += Feed( feedurl = "http://blog.dekkr.nl/rss", link = Option("link"), title = Option("feed title"))
+    if (feeds.list.size < 2)
+      feeds += Feed(feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
 
-  if (feeds.list.size < 2)
-    feeds += Feed( feedurl = "http://matthijsdekker.nl/rss", link = Option("link"), title = Option("Todo"))
+    if (feeds.list.size < 3)
+      feeds += Feed(feedurl = "http://www.nu.nl/rss", link = Option("link"), title = Option("NU"))
 
-  if (feeds.list.size < 3)
-    feeds += Feed( feedurl = "http://www.nu.nl/rss", link = Option("link"), title = Option("NU"))
-
-  // List all available feeds
-  println("id \tupdated \t \t \turl")
-  for {c <- feeds.list} println("" + c.id.get + " \t" + c.updateddate + " \t" + c.feedurl)
-  println("##### Done")
-
+    // List all available feeds
+    println("id \tupdated \t \t \turl")
+    for {c <- feeds.list} println("" + c.id.get + " \t" + c.updateddate + " \t" + c.feedurl)
+    println("##### Done")
+  } catch {
+    case e: Exception => println(s"ERROR: ${e.getMessage} [${e.getCause}}]")
+  }
 
   system.scheduler.schedule(
     Duration.create(0, TimeUnit.MILLISECONDS),
