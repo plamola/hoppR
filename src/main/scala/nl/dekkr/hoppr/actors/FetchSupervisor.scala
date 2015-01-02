@@ -38,7 +38,7 @@ class FetchSupervisor extends Actor {
         //updateLinkedInSubscriptions()
         //updateTwitterSearches()
       } catch {
-        case e: Exception => log.error(s"${e.getMessage} [${e.getCause}}]")
+        case e: Exception => log.error(s"${e.getMessage} [${e.getCause}]")
       }
 
     case SyndicationActor.FeedContent(url, content: SyndFeed) =>
